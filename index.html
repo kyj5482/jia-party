@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jia The Best World Party 🎉</title>
+  <meta name="description" content="지아의 생일 파티에 초대합니다! 관문을 통과하고 파티에 참가하세요." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>" />
+</head>
+<body>
+
+  <!-- 진행 단계 표시 -->
+  <nav id="progress" class="progress hidden" aria-label="진행 단계">
+    <span class="step" data-step="photos">📸 지아 알아가기</span>
+    <span class="step" data-step="quiz">⭕❌ 퀴즈</span>
+    <span class="step" data-step="teaser">🎬 티저</span>
+    <span class="step" data-step="form">📝 참가 신청</span>
+  </nav>
+
+  <!-- ① 불꽃놀이 인트로 -->
+  <section id="stage-intro" class="stage active">
+    <canvas id="fireworks"></canvas>
+    <div class="intro-content">
+      <p class="intro-sub">YOU ARE INVITED TO</p>
+      <h1 class="intro-title">
+        <span class="word w1">JIA</span>
+        <span class="word w2">THE&nbsp;BEST</span>
+        <span class="word w3">WORLD&nbsp;PARTY</span>
+      </h1>
+      <p class="intro-date" id="intro-date"></p>
+      <button id="btn-enter" class="btn btn-big">🎟️ 입장하기</button>
+      <p class="intro-hint">화면을 누르면 불꽃이 터져요!</p>
+    </div>
+  </section>
+
+  <!-- ② 지아 알아가기 (사진 슬라이드) -->
+  <section id="stage-photos" class="stage">
+    <h2 class="stage-title">📸 지아를 소개할게!</h2>
+    <div class="photo-frame">
+      <button class="photo-nav prev" id="photo-prev" aria-label="이전 사진">‹</button>
+      <figure class="photo-card" id="photo-card">
+        <img id="photo-img" src="" alt="지아의 사진" />
+        <figcaption id="photo-caption"></figcaption>
+      </figure>
+      <button class="photo-nav next" id="photo-next" aria-label="다음 사진">›</button>
+    </div>
+    <div class="photo-dots" id="photo-dots"></div>
+    <button id="btn-to-quiz" class="btn hidden">이제 지아를 좀 알겠어! 퀴즈 도전 →</button>
+  </section>
+
+  <!-- ③ 지아 더 알기 O/X 퀴즈 -->
+  <section id="stage-quiz" class="stage">
+    <h2 class="stage-title">⭕❌ 지아 더 알기 퀴즈</h2>
+    <p class="quiz-progress" id="quiz-progress"></p>
+    <div class="quiz-card" id="quiz-card">
+      <p class="quiz-question" id="quiz-question"></p>
+      <div class="quiz-buttons" id="quiz-buttons">
+        <button class="btn-ox btn-o" data-answer="true" aria-label="O, 맞다">⭕</button>
+        <button class="btn-ox btn-x" data-answer="false" aria-label="X, 아니다">❌</button>
+      </div>
+      <div class="quiz-feedback hidden" id="quiz-feedback">
+        <p class="quiz-result" id="quiz-result"></p>
+        <p class="quiz-explain" id="quiz-explain"></p>
+        <button class="btn" id="btn-next-question">다음 →</button>
+      </div>
+    </div>
+    <div class="quiz-final hidden" id="quiz-final">
+      <p class="quiz-score" id="quiz-score"></p>
+      <p class="quiz-verdict" id="quiz-verdict"></p>
+      <button class="btn btn-big hidden" id="btn-quiz-pass">관문 통과! 다음으로 →</button>
+      <button class="btn hidden" id="btn-quiz-retry">다시 도전하기 🔄</button>
+    </div>
+  </section>
+
+  <!-- ④ 티저 (예고편 스타일) -->
+  <section id="stage-teaser" class="stage">
+    <div class="teaser-screen" id="teaser-screen">
+      <p class="teaser-line" id="teaser-line"></p>
+      <button class="btn-skip" id="btn-teaser-skip">건너뛰기 ≫</button>
+    </div>
+    <div class="teaser-end hidden" id="teaser-end">
+      <h2 class="stage-title">어떤 파티일까...? 🤫</h2>
+      <p class="teaser-end-sub">힌트는 딱 세 개. 나머지는 파티에서 직접 확인해!</p>
+      <div class="hint-cards" id="hint-cards"></div>
+      <button class="btn btn-big" id="btn-to-form">참가 신청하러 가기 →</button>
+    </div>
+  </section>
+
+  <!-- ⑤ 참가 신청 폼 -->
+  <section id="stage-form" class="stage">
+    <h2 class="stage-title">📝 파티 참가 신청</h2>
+    <p class="form-sub">모든 관문을 통과했어! 아래 정보를 보호자와 함께 적어줘 😊</p>
+    <form id="rsvp-form" class="rsvp-form">
+      <label>
+        친구 이름 <span class="req">*</span>
+        <input type="text" name="childName" required placeholder="예: 김하늘" />
+      </label>
+      <label>
+        보호자 이름 <span class="req">*</span>
+        <input type="text" name="parentName" required placeholder="예: 김하늘 엄마" />
+      </label>
+      <label>
+        보호자 연락처 <span class="req">*</span>
+        <input type="tel" name="parentPhone" required placeholder="010-0000-0000"
+               pattern="[0-9\-\s]{9,13}" inputmode="tel" />
+      </label>
+      <fieldset>
+        <legend>참석 여부 <span class="req">*</span></legend>
+        <label class="radio"><input type="radio" name="attend" value="참석" required /> 꼭 갈게! 🙌</label>
+        <label class="radio"><input type="radio" name="attend" value="미정" /> 아직 고민 중 🤔</label>
+        <label class="radio"><input type="radio" name="attend" value="불참" /> 못 가서 아쉬워 😢</label>
+      </fieldset>
+      <label>
+        알레르기 / 참고사항
+        <textarea name="notes" rows="3" placeholder="예: 견과류 알레르기가 있어요 / 5시에 먼저 가야 해요"></textarea>
+      </label>
+      <button type="submit" class="btn btn-big" id="btn-submit">🎉 신청하기</button>
+      <p class="form-error hidden" id="form-error"></p>
+    </form>
+  </section>
+
+  <!-- ⑥ 완료 -->
+  <section id="stage-done" class="stage">
+    <div class="done-card">
+      <div class="done-emoji">🎊</div>
+      <h2 class="stage-title">신청 완료!</h2>
+      <p id="done-message">파티에서 만나! 지아가 엄청 기대하고 있어 💜</p>
+      <div class="party-info">
+        <p>📅 <span id="done-date"></span></p>
+        <p>⏰ <span id="done-time"></span></p>
+        <p>📍 <span id="done-place"></span></p>
+      </div>
+      <div class="pool-notice hidden" id="pool-notice">
+        <h3>💦 잠깐! 혹시 몰라서 하는 말인데...</h3>
+        <p>물에 젖을 수도 있는 파티라는 소문이... 이것들을 챙겨오면 후회하지 않을 거야!</p>
+        <ul id="pool-checklist"></ul>
+      </div>
+      <div class="manual-send hidden" id="manual-send">
+        <p>아래 버튼으로 신청 내용을 지아 부모님께 보내주세요!</p>
+        <button class="btn" id="btn-sms">💬 문자로 보내기</button>
+        <button class="btn" id="btn-copy">📋 내용 복사하기</button>
+        <p class="copy-done hidden" id="copy-done">복사되었어요! 카카오톡 등에 붙여넣어 보내주세요 ✅</p>
+      </div>
+    </div>
+    <canvas id="confetti"></canvas>
+  </section>
+
+  <script src="js/config.js"></script>
+  <script src="js/fireworks.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
