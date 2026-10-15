@@ -49,6 +49,7 @@
       <button class="photo-nav next" id="photo-next" aria-label="Next photo">›</button>
     </div>
     <div class="photo-dots" id="photo-dots"></div>
+    <p class="swipe-hint">👈 Swipe to see more 👉</p>
     <button id="btn-to-quiz" class="btn hidden">I know Jia now! Take the quiz →</button>
   </section>
 
@@ -96,15 +97,15 @@
     <p class="form-sub">You passed every challenge! Fill this out together with a parent 😊</p>
     <form id="rsvp-form" class="rsvp-form">
       <label>
-        Friend's name <span class="req">*</span>
+        <span class="label-title">Friend's name <span class="req">*</span></span>
         <input type="text" name="childName" required placeholder="e.g. Emma Kim" />
       </label>
       <label>
-        Parent's name <span class="req">*</span>
+        <span class="label-title">Parent's name <span class="req">*</span></span>
         <input type="text" name="parentName" required placeholder="e.g. Emma's mom" />
       </label>
       <label>
-        Parent's phone number <span class="req">*</span>
+        <span class="label-title">Parent's phone number <span class="req">*</span></span>
         <input type="tel" name="parentPhone" required placeholder="(555) 123-4567"
                pattern="[0-9()+\-\s]{9,17}" inputmode="tel" />
       </label>
@@ -115,7 +116,7 @@
         <label class="radio"><input type="radio" name="attend" value="No" /> Sadly can't make it 😢</label>
       </fieldset>
       <label>
-        Allergies / notes
+        <span class="label-title">Allergies / notes</span>
         <textarea name="notes" rows="3" placeholder="e.g. Peanut allergy / Needs to leave at 5 PM"></textarea>
       </label>
       <button type="submit" class="btn btn-big" id="btn-submit">🎉 Send RSVP</button>

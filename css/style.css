@@ -28,6 +28,9 @@ body {
 
 .hidden { display: none !important; }
 
+/* 모바일에서 버튼 연속 탭 시 더블탭 줌 방지 */
+button, .hint-card, .progress .step { touch-action: manipulation; }
+
 /* ---------- 공통 ---------- */
 .stage {
   display: none;
@@ -91,6 +94,8 @@ body {
 .progress .step.current { background: var(--purple); color: #fff; }
 .progress .step.done { background: #d7f5dd; color: #2e7d44; }
 .progress .step.done::after { content: " ✓"; }
+.progress .step.reachable { cursor: pointer; }
+.progress .step.reachable:hover { filter: brightness(0.93); }
 
 /* ---------- ① 인트로 ---------- */
 #stage-intro {
@@ -179,6 +184,9 @@ body {
   padding: 14px 14px 18px;
   box-shadow: 0 12px 32px rgba(109, 40, 217, 0.15);
   transform: rotate(-1deg);
+  touch-action: pan-y; /* 좌우 스와이프는 사진 넘김, 세로는 스크롤 유지 */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .photo-card img {
   width: 100%;
@@ -186,6 +194,12 @@ body {
   object-fit: cover;
   border-radius: 12px;
   background: #eee;
+  -webkit-user-drag: none;
+}
+.photo-card.swap img, .photo-card.swap figcaption { animation: photo-swap 0.3s ease; }
+@keyframes photo-swap {
+  from { opacity: 0.2; }
+  to   { opacity: 1; }
 }
 .photo-card figcaption {
   margin-top: 12px;
@@ -217,6 +231,8 @@ body {
   transition: background 0.2s, transform 0.2s;
 }
 .photo-dots .dot.on { background: var(--purple); transform: scale(1.3); }
+
+.swipe-hint { color: #b3a8cc; font-size: 0.85rem; margin: -10px 0 18px; }
 
 /* ---------- ③ 퀴즈 ---------- */
 #stage-quiz { background: linear-gradient(180deg, #fefce8, var(--paper)); }
@@ -391,6 +407,7 @@ body {
   text-align: left;
 }
 .rsvp-form label { display: flex; flex-direction: column; gap: 6px; font-size: 1.05rem; }
+.label-title { display: block; } /* 제목과 * 를 같은 줄에 유지 */
 .req { color: var(--pink); }
 .rsvp-form input[type="text"],
 .rsvp-form input[type="tel"],

@@ -9,6 +9,8 @@
   // ---------- 단계 전환 ----------
   const STEP_ORDER = ["photos", "quiz", "teaser", "form"];
   let fireworks = null;
+  let maxReachedIdx = -1; // 지금까지 도달한 가장 먼 단계
+  let rsvpDone = false;   // 신청 완료 후에는 단계 이동 잠금 (중복 제출 방지)
 
   function goToStage(name) {
     document.querySelectorAll(".stage").forEach((s) => s.classList.remove("active"));
@@ -21,10 +23,15 @@
     } else {
       progress.classList.remove("hidden");
       const idx = STEP_ORDER.indexOf(name);
+      if (idx > maxReachedIdx) maxReachedIdx = idx;
       progress.querySelectorAll(".step").forEach((el) => {
         const stepIdx = STEP_ORDER.indexOf(el.dataset.step);
         el.classList.toggle("current", el.dataset.step === name);
         el.classList.toggle("done", name === "done" || (idx >= 0 && stepIdx >= 0 && stepIdx < idx));
+        el.classList.toggle(
+          "reachable",
+          !rsvpDone && stepIdx <= maxReachedIdx && el.dataset.step !== name
+        );
       });
     }
 
@@ -32,6 +39,14 @@
     if (name === "teaser") playTeaser();
     if (name === "done") JiaFX.startConfetti($("#confetti"));
   }
+
+  // 진행 단계 탭: 이미 도달했던 단계로는 되돌아갈 수 있음
+  document.querySelectorAll("#progress .step").forEach((el) => {
+    el.addEventListener("click", () => {
+      const stepIdx = STEP_ORDER.indexOf(el.dataset.step);
+      if (!rsvpDone && stepIdx <= maxReachedIdx) goToStage(el.dataset.step);
+    });
+  });
 
   // ---------- ① 인트로 ----------
   $("#intro-date").textContent = `${C.partyDate} · ${C.partyTime}`;
@@ -50,7 +65,14 @@
   });
 
   function showPhoto(i) {
-    photoIdx = Math.max(0, Math.min(C.photos.length - 1, i));
+    const next = Math.max(0, Math.min(C.photos.length - 1, i));
+    if (next !== photoIdx) {
+      const card = $("#photo-card");
+      card.classList.remove("swap");
+      void card.offsetWidth; // 애니메이션 재시작
+      card.classList.add("swap");
+    }
+    photoIdx = next;
     const p = C.photos[photoIdx];
     $("#photo-img").src = p.src;
     $("#photo-caption").textContent = p.caption;
@@ -63,6 +85,22 @@
   }
   $("#photo-prev").addEventListener("click", () => showPhoto(photoIdx - 1));
   $("#photo-next").addEventListener("click", () => showPhoto(photoIdx + 1));
+
+  // 좌우 스와이프로 사진 넘기기 (touch-action: pan-y라 세로 스크롤과 공존)
+  const photoCard = $("#photo-card");
+  let swipeStartX = 0, swipeStartY = 0;
+  photoCard.addEventListener("touchstart", (e) => {
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+  photoCard.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    const dy = e.changedTouches[0].clientY - swipeStartY;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      showPhoto(photoIdx + (dx < 0 ? 1 : -1));
+    }
+  }, { passive: true });
+
   showPhoto(0);
 
   $("#btn-to-quiz").addEventListener("click", () => { startQuiz(); goToStage("quiz"); });
@@ -169,7 +207,7 @@
 
       // 등장 완료 후, 문장 길이에 비례해 선명하게 멈춘 채 읽을 시간을 줌
       const inMs = w * WORD_STEP + 380;
-      const holdMs = Math.max(1100, 650 + text.length * 45) + (finale ? 800 : 0);
+      const holdMs = Math.max(1100, 650 + text.length * 45);
       const outMs = 350;
       i++;
       teaserTimer = setTimeout(() => {
@@ -268,6 +306,8 @@
         ul.appendChild(li);
       });
     }
+
+    rsvpDone = true; // 완료 후 단계 이동 잠금
 
     if (manual) {
       $("#manual-send").classList.remove("hidden");
