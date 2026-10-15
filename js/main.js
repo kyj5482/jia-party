@@ -140,19 +140,42 @@
     teaserPlayed = true;
 
     const lineEl = $("#teaser-line");
-    const LINE_MS = 2300;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const WORD_STEP = reduced ? 0 : 110; // 단어별 등장 간격(ms)
     let i = 0;
 
     function next() {
       if (i >= C.teaserLines.length) return endTeaser();
       const text = C.teaserLines[i];
-      lineEl.textContent = text;
-      lineEl.classList.toggle("finale", text.includes("JIA"));
-      lineEl.classList.remove("show");
-      void lineEl.offsetWidth; // 애니메이션 재시작 트릭
-      lineEl.classList.add("show");
+      const finale = text.includes("JIA");
+      lineEl.classList.toggle("finale", finale);
+      lineEl.classList.remove("out");
+
+      // 단어 단위로 쪼개 스태거 등장 (줄바꿈은 pre-line으로 유지)
+      lineEl.textContent = "";
+      let w = 0;
+      text.split("\n").forEach((seg, si) => {
+        if (si > 0) lineEl.appendChild(document.createTextNode("\n"));
+        seg.split(" ").forEach((word, wi) => {
+          if (wi > 0) lineEl.appendChild(document.createTextNode(" "));
+          const span = document.createElement("span");
+          span.className = "tw";
+          span.textContent = word;
+          span.style.animationDelay = `${w * WORD_STEP}ms`;
+          lineEl.appendChild(span);
+          w++;
+        });
+      });
+
+      // 등장 완료 후, 문장 길이에 비례해 선명하게 멈춘 채 읽을 시간을 줌
+      const inMs = w * WORD_STEP + 380;
+      const holdMs = Math.max(1100, 650 + text.length * 45) + (finale ? 800 : 0);
+      const outMs = 350;
       i++;
-      teaserTimer = setTimeout(next, LINE_MS);
+      teaserTimer = setTimeout(() => {
+        lineEl.classList.add("out");
+        teaserTimer = setTimeout(next, outMs);
+      }, inMs + holdMs);
     }
     next();
   }
