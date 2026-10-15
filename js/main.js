@@ -80,14 +80,7 @@
   });
 
   function showPhoto(i) {
-    const next = Math.max(0, Math.min(C.photos.length - 1, i));
-    if (next !== photoIdx) {
-      const card = $("#photo-card");
-      card.classList.remove("swap");
-      void card.offsetWidth; // 애니메이션 재시작
-      card.classList.add("swap");
-    }
-    photoIdx = next;
+    photoIdx = Math.max(0, Math.min(C.photos.length - 1, i));
     const p = C.photos[photoIdx];
     $("#photo-img").src = p.src;
     $("#photo-caption").textContent = p.caption;
@@ -98,24 +91,78 @@
     seenPhotos.add(photoIdx);
     if (seenPhotos.size === C.photos.length) $("#btn-to-quiz").classList.remove("hidden");
   }
-  $("#photo-prev").addEventListener("click", () => showPhoto(photoIdx - 1));
-  $("#photo-next").addEventListener("click", () => showPhoto(photoIdx + 1));
+  $("#photo-prev").addEventListener("click", () => slidePhoto(-1));
+  $("#photo-next").addEventListener("click", () => slidePhoto(1));
 
-  // 좌우 스와이프로 사진 넘기기 — 사진 단계 화면 전체에서 동작
-  // (touch-action: pan-y라 세로 스크롤과 공존)
+  // 사진 전환: 현재 카드가 밀려 나가고 새 사진이 반대편에서 들어옴
+  const photoCardEl = $("#photo-card");
+  let photoSliding = false;
+
+  function slidePhoto(dir) {
+    const target = photoIdx + dir;
+    if (photoSliding || target < 0 || target >= C.photos.length) return;
+    photoSliding = true;
+    photoCardEl.style.transition = "transform 0.18s ease-in, opacity 0.18s ease-in";
+    photoCardEl.style.transform = `translateX(${-dir * 140}px) rotate(-1deg)`;
+    photoCardEl.style.opacity = "0";
+    setTimeout(() => {
+      showPhoto(target);
+      photoCardEl.style.transition = "none";
+      photoCardEl.style.transform = `translateX(${dir * 90}px) rotate(-1deg)`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        photoCardEl.style.transition = "transform 0.22s ease-out, opacity 0.22s ease-out";
+        photoCardEl.style.transform = "";
+        photoCardEl.style.opacity = "";
+        setTimeout(() => { photoSliding = false; }, 230);
+      }));
+    }, 180);
+  }
+
+  // 좌우 스와이프: 손가락을 따라 카드가 끌려오고, 임계값을 넘으면 전환
+  // 사진 단계 화면 전체에서 동작 (touch-action: pan-y라 세로 스크롤과 공존)
   const photoStage = $("#stage-photos");
   let swipeStartX = 0, swipeStartY = 0;
+  let swipeHoriz = null; // 가로 제스처인지 판정 결과 (null = 미판정)
+
   photoStage.addEventListener("touchstart", (e) => {
+    if (photoSliding) return;
     swipeStartX = e.touches[0].clientX;
     swipeStartY = e.touches[0].clientY;
+    swipeHoriz = null;
+    photoCardEl.style.transition = "none";
   }, { passive: true });
-  photoStage.addEventListener("touchend", (e) => {
-    const dx = e.changedTouches[0].clientX - swipeStartX;
-    const dy = e.changedTouches[0].clientY - swipeStartY;
-    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      showPhoto(photoIdx + (dx < 0 ? 1 : -1));
+
+  photoStage.addEventListener("touchmove", (e) => {
+    if (photoSliding) return;
+    const dx = e.touches[0].clientX - swipeStartX;
+    const dy = e.touches[0].clientY - swipeStartY;
+    if (swipeHoriz === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+      swipeHoriz = Math.abs(dx) > Math.abs(dy);
     }
+    if (!swipeHoriz) return;
+    // 첫/마지막 사진에서 더 가려고 하면 1/3로 저항감
+    const atEdge = (dx > 0 && photoIdx === 0) || (dx < 0 && photoIdx === C.photos.length - 1);
+    const move = atEdge ? dx / 3 : dx;
+    photoCardEl.style.transform = `translateX(${move}px) rotate(-1deg)`;
+    photoCardEl.style.opacity = String(Math.max(0.45, 1 - Math.abs(move) / 320));
   }, { passive: true });
+
+  function endSwipe(e) {
+    if (photoSliding || swipeHoriz === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    const atEdge = (dx > 0 && photoIdx === 0) || (dx < 0 && photoIdx === C.photos.length - 1);
+    if (swipeHoriz && Math.abs(dx) > 55 && !atEdge) {
+      slidePhoto(dx < 0 ? 1 : -1);
+    } else {
+      // 임계값 미달 또는 끝 사진: 제자리로 복귀
+      photoCardEl.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+      photoCardEl.style.transform = "";
+      photoCardEl.style.opacity = "";
+    }
+    swipeHoriz = null;
+  }
+  photoStage.addEventListener("touchend", endSwipe, { passive: true });
+  photoStage.addEventListener("touchcancel", endSwipe, { passive: true });
 
   showPhoto(0);
 

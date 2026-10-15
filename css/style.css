@@ -199,11 +199,8 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   background: #eee;
   -webkit-user-drag: none;
 }
-.photo-card.swap img, .photo-card.swap figcaption { animation: photo-swap 0.3s ease; }
-@keyframes photo-swap {
-  from { opacity: 0.2; }
-  to   { opacity: 1; }
-}
+/* 스와이프 드래그 추적은 JS가 인라인 transform/opacity로 처리 */
+.photo-card { will-change: transform, opacity; }
 .photo-card figcaption {
   margin-top: 12px;
   font-family: "Patrick Hand", cursive;
@@ -320,12 +317,14 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 @keyframes word-in {
   to { opacity: 1; transform: none; }
 }
-.teaser-line.finale {
+/* 그라데이션은 단어(span)마다 직접 적용 — 부모에 background-clip: text를 쓰면
+   transform이 걸린 자식 span 때문에 클리핑이 깨져 글자가 투명해지는 브라우저가 있음 */
+.teaser-line.finale { text-shadow: none; }
+.teaser-line.finale .tw {
   background: linear-gradient(135deg, #fbbf24, #f472b6, #8b5cf6);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .teaser-line .tw { animation: none; opacity: 1; transform: none; }
