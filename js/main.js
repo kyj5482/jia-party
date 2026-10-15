@@ -86,14 +86,15 @@
   $("#photo-prev").addEventListener("click", () => showPhoto(photoIdx - 1));
   $("#photo-next").addEventListener("click", () => showPhoto(photoIdx + 1));
 
-  // 좌우 스와이프로 사진 넘기기 (touch-action: pan-y라 세로 스크롤과 공존)
-  const photoCard = $("#photo-card");
+  // 좌우 스와이프로 사진 넘기기 — 사진 단계 화면 전체에서 동작
+  // (touch-action: pan-y라 세로 스크롤과 공존)
+  const photoStage = $("#stage-photos");
   let swipeStartX = 0, swipeStartY = 0;
-  photoCard.addEventListener("touchstart", (e) => {
+  photoStage.addEventListener("touchstart", (e) => {
     swipeStartX = e.touches[0].clientX;
     swipeStartY = e.touches[0].clientY;
   }, { passive: true });
-  photoCard.addEventListener("touchend", (e) => {
+  photoStage.addEventListener("touchend", (e) => {
     const dx = e.changedTouches[0].clientX - swipeStartX;
     const dy = e.changedTouches[0].clientY - swipeStartY;
     if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {

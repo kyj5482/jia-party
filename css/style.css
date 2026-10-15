@@ -168,7 +168,10 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 }
 
 /* ---------- ② 사진 슬라이드 ---------- */
-#stage-photos { background: linear-gradient(180deg, #fdf4ff, var(--paper)); }
+#stage-photos {
+  background: linear-gradient(180deg, #fdf4ff, var(--paper));
+  touch-action: pan-y; /* 화면 전체에서 좌우 스와이프로 사진 넘김 */
+}
 
 .photo-frame {
   display: flex;
