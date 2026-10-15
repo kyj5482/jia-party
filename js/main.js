@@ -206,16 +206,23 @@
       const isLast = i === C.teaserLines.length - 1;
       if (isLast && !heartbeatShown && !reduced) {
         heartbeatShown = true;
-        lineEl.classList.remove("finale", "out");
+        lineEl.classList.remove("finale");
+        // 직전 문장의 페이드아웃 transition이 하트 등장까지 늦추지 않도록
+        // 투명도를 즉시 복귀시키고, 등장 연출은 heart-in 애니메이션에 맡김
+        lineEl.style.transition = "none";
+        lineEl.classList.remove("out");
+        void lineEl.offsetWidth;
+        lineEl.style.transition = "";
         lineEl.textContent = "";
         const heart = document.createElement("span");
         heart.className = "teaser-heart";
         heart.textContent = "💜";
         lineEl.appendChild(heart);
+        // heart-in 0.25s + 박동 1s×2 = 2.25s가 끝까지 재생되도록 2.4s 유지
         teaserTimer = setTimeout(() => {
           lineEl.classList.add("out");
           teaserTimer = setTimeout(next, 300);
-        }, 2100);
+        }, 2400);
         return;
       }
 
