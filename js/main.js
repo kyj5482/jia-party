@@ -81,7 +81,7 @@
 
   function showQuestion() {
     const q = C.quiz[quizIdx];
-    $("#quiz-progress").textContent = `문제 ${quizIdx + 1} / ${C.quiz.length} · 현재 ${quizScore}개 정답`;
+    $("#quiz-progress").textContent = `Question ${quizIdx + 1} of ${C.quiz.length} · ${quizScore} correct so far`;
     $("#quiz-question").textContent = q.question;
     $("#quiz-feedback").classList.add("hidden");
     document.querySelectorAll(".btn-ox").forEach((b) => (b.disabled = false));
@@ -96,12 +96,12 @@
 
       document.querySelectorAll(".btn-ox").forEach((b) => (b.disabled = true));
       const result = $("#quiz-result");
-      result.textContent = correct ? "🎉 정답!" : "😅 땡! 아쉬워~";
+      result.textContent = correct ? "🎉 Correct!" : "😅 Oops, not quite!";
       result.className = "quiz-result " + (correct ? "correct" : "wrong");
       $("#quiz-explain").textContent = q.explain;
       $("#quiz-feedback").classList.remove("hidden");
       $("#btn-next-question").textContent =
-        quizIdx === C.quiz.length - 1 ? "결과 보기 🏁" : "다음 문제 →";
+        quizIdx === C.quiz.length - 1 ? "See results 🏁" : "Next question →";
     });
   });
 
@@ -118,12 +118,12 @@
     $("#quiz-card").classList.add("hidden");
     $("#quiz-final").classList.remove("hidden");
     $("#quiz-progress").textContent = "";
-    $("#quiz-score").textContent = `${C.quiz.length}문제 중 ${quizScore}개 정답!`;
+    $("#quiz-score").textContent = `You got ${quizScore} out of ${C.quiz.length}!`;
 
     const passed = quizScore >= C.quizPassScore;
     $("#quiz-verdict").textContent = passed
-      ? `${C.childName}에 대해 이만큼 안다니, 진짜 친구 인정! 💜 다음 관문으로 가자!`
-      : `아직 ${C.childName}을(를) 조금 더 알아야 해! ${C.quizPassScore}개 이상 맞추면 통과야. 다시 도전해봐!`;
+      ? `You really know ${C.childName} — true friend confirmed! 💜 On to the next challenge!`
+      : `Hmm, you need to know ${C.childName} a little better! Get ${C.quizPassScore} or more to pass. Try again!`;
     $("#btn-quiz-pass").classList.toggle("hidden", !passed);
     $("#btn-quiz-retry").classList.toggle("hidden", passed);
   }
@@ -192,7 +192,7 @@
 
     const submitBtn = $("#btn-submit");
     submitBtn.disabled = true;
-    submitBtn.textContent = "보내는 중...";
+    submitBtn.textContent = "Sending...";
 
     if (C.formspreeEndpoint) {
       try {
@@ -201,13 +201,13 @@
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("전송 실패");
+        if (!res.ok) throw new Error("send failed");
         showDone(data, false);
       } catch (err) {
-        errEl.textContent = "앗, 전송에 실패했어요. 잠시 후 다시 시도해 주세요!";
+        errEl.textContent = "Oops, sending failed. Please try again in a moment!";
         errEl.classList.remove("hidden");
         submitBtn.disabled = false;
-        submitBtn.textContent = "🎉 신청하기";
+        submitBtn.textContent = "🎉 Send RSVP";
       }
     } else {
       // 전송 서버가 없으면 문자/복사로 전달
@@ -217,12 +217,12 @@
 
   function rsvpText(data) {
     return (
-      `[${C.partyTitle} 참가 신청]\n` +
-      `친구 이름: ${data.childName}\n` +
-      `보호자: ${data.parentName}\n` +
-      `연락처: ${data.parentPhone}\n` +
-      `참석 여부: ${data.attend}\n` +
-      `참고사항: ${data.notes || "없음"}`
+      `[${C.partyTitle} RSVP]\n` +
+      `Friend: ${data.childName}\n` +
+      `Parent: ${data.parentName}\n` +
+      `Phone: ${data.parentPhone}\n` +
+      `Attending: ${data.attend}\n` +
+      `Notes: ${data.notes || "None"}`
     );
   }
 
@@ -231,11 +231,11 @@
     $("#done-time").textContent = C.partyTime;
     $("#done-place").textContent = C.partyPlace;
     $("#done-message").textContent =
-      data.attend === "불참"
-        ? `아쉽지만 마음만으로도 고마워! ${C.childName}이(가) 다음에 꼭 같이 놀재 💜`
-        : `${data.childName} 친구, 파티에서 만나! ${C.childName}이(가) 엄청 기대하고 있어 💜`;
+      data.attend === "No"
+        ? `We'll miss you! Thanks for letting us know — ${C.childName} says let's play together soon 💜`
+        : `See you at the party, ${data.childName}! ${C.childName} is SO excited 💜`;
 
-    if (C.isPoolParty && data.attend !== "불참") {
+    if (C.isPoolParty && data.attend !== "No") {
       $("#pool-notice").classList.remove("hidden");
       const ul = $("#pool-checklist");
       ul.innerHTML = "";
@@ -257,7 +257,7 @@
           await navigator.clipboard.writeText(text);
         } catch (e) {
           // 클립보드 권한이 없으면 선택 가능한 프롬프트로 대체
-          window.prompt("아래 내용을 길게 눌러 복사하세요:", text);
+          window.prompt("Press and hold to copy the text below:", text);
         }
         $("#copy-done").classList.remove("hidden");
       });

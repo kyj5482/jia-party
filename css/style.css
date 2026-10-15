@@ -20,7 +20,7 @@
 html, body { height: 100%; }
 
 body {
-  font-family: "Jua", "Gaegu", sans-serif;
+  font-family: "Fredoka", sans-serif;
   color: var(--ink);
   background: var(--paper);
   overflow-x: hidden;
@@ -189,8 +189,8 @@ body {
 }
 .photo-card figcaption {
   margin-top: 12px;
-  font-family: "Gaegu", cursive;
-  font-weight: 700;
+  font-family: "Patrick Hand", cursive;
+  font-weight: 400;
   font-size: 1.15rem;
   min-height: 2.4em;
 }
@@ -256,8 +256,8 @@ body {
 .quiz-result.correct { color: #059669; }
 .quiz-result.wrong { color: #dc2626; }
 .quiz-explain {
-  font-family: "Gaegu", cursive;
-  font-weight: 700;
+  font-family: "Patrick Hand", cursive;
+  font-weight: 400;
   font-size: 1.1rem;
   margin-bottom: 18px;
   color: #5b4a73;
@@ -385,8 +385,8 @@ body {
 .rsvp-form input[type="text"],
 .rsvp-form input[type="tel"],
 .rsvp-form textarea {
-  font-family: "Gaegu", sans-serif;
-  font-weight: 700;
+  font-family: "Patrick Hand", sans-serif;
+  font-weight: 400;
   font-size: 1.05rem;
   padding: 11px 14px;
   border: 2px solid #e3dcf2;

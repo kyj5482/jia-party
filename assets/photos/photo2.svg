@@ -6,6 +6,6 @@
   </defs>
   <rect width="400" height="300" fill="url(#g2)"/>
   <text x="200" y="140" font-size="72" text-anchor="middle">🎨</text>
-  <text x="200" y="205" font-size="22" text-anchor="middle" fill="#92400e" font-family="sans-serif">여기에 지아 사진 2를 넣어주세요</text>
-  <text x="200" y="235" font-size="14" text-anchor="middle" fill="#b45309" font-family="sans-serif">assets/photos/ 폴더 + js/config.js 수정</text>
+  <text x="200" y="205" font-size="22" text-anchor="middle" fill="#92400e" font-family="sans-serif">Put Jia's photo #2 here</text>
+  <text x="200" y="235" font-size="14" text-anchor="middle" fill="#b45309" font-family="sans-serif">assets/photos/ folder + edit js/config.js</text>
 </svg>

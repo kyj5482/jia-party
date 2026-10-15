@@ -1,94 +1,97 @@
 // ============================================================
-//  Jia The Best World Party — 설정 파일
-//  이 파일만 수정하면 초대장의 모든 내용이 바뀝니다.
+//  Jia The Best World Party — Settings
+//  Edit this one file to change everything on the invitation.
+//  (이 파일만 수정하면 초대장의 모든 내용이 바뀝니다.)
 // ============================================================
 
 const PARTY_CONFIG = {
-  // ---------- 기본 정보 ----------
-  childName: "지아",
+  // ---------- Basic info ----------
+  childName: "Jia",
   partyTitle: "Jia The Best World Party",
-  partyDate: "2026년 00월 00일 (토)",
-  partyTime: "오후 2:00 ~ 6:00",
-  partyPlace: "참가 신청한 친구에게 개별 안내 💌", // 공개 주소를 쓰려면 여기 입력
-  rsvpDeadline: "00월 00일까지 신청해 주세요!",
+  partyDate: "Saturday, November 7, 2026",
+  partyTime: "2:00 PM – 6:00 PM",
+  partyPlace: "The location will be shared with confirmed guests 💌", // or put the address here
+  rsvpDeadline: "Please RSVP by October 31!",
 
-  // 풀 파티면 true → 완료 화면에 수영복 준비물 안내가 자동으로 나옵니다.
+  // Set to true for a pool party → the "bring your swimsuit" checklist
+  // appears automatically on the final screen.
   isPoolParty: true,
-  poolChecklist: ["수영복 🩱", "수건 🧺", "물안경 🥽", "갈아입을 옷 👕", "방수팩(선택) 📱"],
+  poolChecklist: ["Swimsuit 🩱", "Towel 🧺", "Goggles 🥽", "Change of clothes 👕", "Waterproof pouch (optional) 📱"],
 
-  // ---------- 신청 폼 전송 ----------
-  // Formspree(https://formspree.io)에서 폼을 만들고 주소를 넣으세요.
-  // 예: "https://formspree.io/f/abcdwxyz"
-  // 비워두면("") 신청 내용을 문자/복사로 보내는 버튼이 대신 표시됩니다.
+  // ---------- RSVP form delivery ----------
+  // Create a free form at https://formspree.io and paste the endpoint here.
+  // Example: "https://formspree.io/f/abcdwxyz"
+  // If left empty (""), buttons to send the RSVP by text message / copy
+  // to clipboard will be shown instead.
   formspreeEndpoint: "",
-  rsvpPhone: "", // 문자로 보내기용 보호자 번호. 예: "01012345678"
+  rsvpPhone: "", // parent phone number for the "Send by text" button, e.g. "15551234567"
 
-  // ---------- 2단계: 지아 알아가기 사진 ----------
-  // assets/photos/ 폴더에 사진을 넣고 src와 caption을 바꾸세요.
+  // ---------- Step 2: Get to know Jia (photos) ----------
+  // Put photos in assets/photos/ and update src & caption below.
   photos: [
     {
       src: "assets/photos/photo1.svg",
-      caption: "안녕! 나는 지아야 👋 올해 생일 파티의 주인공이지!",
+      caption: "Hi! I'm Jia 👋 and this year's birthday party is going to be EPIC!",
     },
     {
       src: "assets/photos/photo2.svg",
-      caption: "나는 그림 그리기를 좋아해. 특히 반짝이는 걸 그릴 때가 제일 신나!",
+      caption: "I love drawing — especially anything sparkly and colorful!",
     },
     {
       src: "assets/photos/photo3.svg",
-      caption: "물놀이는 내가 세상에서 제일 좋아하는 것 중 하나야 💦",
+      caption: "Splashing in the water is one of my favorite things in the whole world 💦",
     },
     {
       src: "assets/photos/photo4.svg",
-      caption: "이번 파티는 역대급으로 준비했어. 끝까지 통과해서 꼭 와줘!",
+      caption: "This party is going to be the best one ever. Pass the challenges and come join me!",
     },
   ],
 
-  // ---------- 3단계: 지아 더 알기 O/X 퀴즈 ----------
-  // answer: true = O 가 정답, false = X 가 정답
-  // explain: 정답 공개 후 보여줄 설명 (지아를 더 알게 되는 포인트!)
+  // ---------- Step 3: O/X quiz about Jia ----------
+  // answer: true = O (true) is correct, false = X (false) is correct
+  // explain: shown after answering — helps friends get to know Jia!
   quiz: [
     {
-      question: "지아가 가장 좋아하는 색깔은 보라색이다?",
+      question: "Jia's favorite color is purple.",
       answer: true,
-      explain: "맞아요! 지아는 보라색을 제일 좋아해요 💜 보라색 물건을 보면 그냥 못 지나쳐요.",
+      explain: "Correct! Jia LOVES purple 💜 She can't walk past anything purple without stopping.",
     },
     {
-      question: "지아는 매운 떡볶이를 아주 잘 먹는다?",
+      question: "Jia loves super spicy food.",
       answer: false,
-      explain: "지아는 사실 매운 걸 잘 못 먹어요 🥵 파티 간식은 안 매운 걸로 준비할게요!",
+      explain: "Nope! Jia can't handle spicy food 🥵 Don't worry — the party snacks won't be spicy!",
     },
     {
-      question: "지아가 제일 좋아하는 동물은 고양이다?",
+      question: "Jia's favorite animal is the cat.",
       answer: true,
-      explain: "정답! 지아는 고양이만 보면 멈춰 서서 한참을 봐요 🐱",
+      explain: "That's right! Jia stops and stares every single time she sees a cat 🐱",
     },
     {
-      question: "지아는 수영을 무서워한다?",
+      question: "Jia is afraid of swimming.",
       answer: false,
-      explain: "전혀요! 지아는 물에만 들어가면 인어공주가 됩니다 🧜‍♀️ (힌트일지도...?)",
+      explain: "Not at all! Jia turns into a mermaid the moment she touches water 🧜‍♀️ (hint, hint...?)",
     },
     {
-      question: "지아의 장래희망은 화가다?",
+      question: "Jia wants to be an artist when she grows up.",
       answer: true,
-      explain: "맞아요! 지아의 꿈은 멋진 그림을 그리는 화가예요 🎨",
+      explain: "Yes! Jia dreams of becoming an amazing artist 🎨",
     },
   ],
-  quizPassScore: 3, // 통과에 필요한 정답 개수
+  quizPassScore: 3, // correct answers needed to pass
 
-  // ---------- 4단계: 티저 (영화 예고편 스타일 문구) ----------
-  // 한 줄씩 화면 가득 나타났다 사라집니다.
+  // ---------- Step 4: Teaser (movie-trailer style lines) ----------
+  // Each line fills the screen one at a time.
   teaserLines: [
-    "올해 여름...",
-    "단 하루,",
-    "단 한 번뿐인 파티가 열린다",
-    "💦 첨벙이는 소리...?",
-    "🗺️ 어딘가에 숨겨진 보물...?",
-    "🔐 잠긴 문 뒤의 비밀...?",
-    "모든 것이 밝혀지는 날",
+    "This November...",
+    "For one day only,",
+    "a once-in-a-lifetime party begins",
+    "💦 The sound of splashing...?",
+    "🗺️ A treasure hidden somewhere...?",
+    "🔐 A secret behind a locked door...?",
+    "Everything will be revealed",
     "JIA\nTHE BEST WORLD PARTY",
-    "너도 초대받았어.",
+    "And YOU are invited.",
   ],
-  // 티저 끝에 보여줄 미스터리 힌트 카드 (뒤집으면 ???만 보임 — 궁금증 유발용)
+  // Mystery hint cards shown after the teaser (front shows ??? to build curiosity)
   teaserHints: ["💦", "🗺️", "🔐"],
 };
