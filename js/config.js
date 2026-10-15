@@ -23,8 +23,8 @@ const PARTY_CONFIG = {
   // Example: "https://formspree.io/f/abcdwxyz"
   // If left empty (""), buttons to send the RSVP by text message / copy
   // to clipboard will be shown instead.
-  formspreeEndpoint: "",
-  rsvpPhone: "", // parent phone number for the "Send by text" button, e.g. "15551234567"
+  formspreeEndpoint: "https://formspree.io/f/mvkzdker",
+  rsvpPhone: "", // 비워두면 문자 보내기 버튼이 표시되지 않음 (문자 수신 안 함)
 
   // ---------- Step 2: Get to know Jia (photos) ----------
   // Put photos in assets/photos/ and update src & caption below.
