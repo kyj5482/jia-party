@@ -36,15 +36,30 @@
     }
 
     if (name !== "intro" && fireworks) { fireworks.stop(); fireworks = null; }
+    if (name === "intro" && !fireworks) fireworks = JiaFX.startFireworks($("#fireworks"));
     if (name === "teaser") playTeaser();
     if (name === "done") JiaFX.startConfetti($("#confetti"));
   }
 
-  // 진행 단계 탭: 이미 도달했던 단계로는 되돌아갈 수 있음
+  // 진행 단계 탭: 이미 도달했던 단계로 되돌아가면 그 단계의 처음부터 다시
   document.querySelectorAll("#progress .step").forEach((el) => {
     el.addEventListener("click", () => {
-      const stepIdx = STEP_ORDER.indexOf(el.dataset.step);
-      if (!rsvpDone && stepIdx <= maxReachedIdx) goToStage(el.dataset.step);
+      const step = el.dataset.step;
+      const stepIdx = STEP_ORDER.indexOf(step);
+      if (rsvpDone || stepIdx > maxReachedIdx) return;
+
+      if (step === "photos") {
+        // Meet Jia는 사이트 맨 첫 화면(불꽃 인트로)부터
+        showPhoto(0);
+        goToStage("intro");
+      } else if (step === "quiz") {
+        startQuiz();
+        goToStage("quiz");
+      } else if (step === "teaser") {
+        replayTeaser();
+      } else {
+        goToStage(step);
+      }
     });
   });
 
@@ -175,16 +190,35 @@
   let teaserPlayed = false;
 
   function playTeaser() {
-    if (teaserPlayed) return; // 뒤로 돌아와도 재생은 1회
+    if (teaserPlayed) return; // 뒤로 돌아와도 재생은 1회 (replayTeaser로 재생 가능)
     teaserPlayed = true;
 
     const lineEl = $("#teaser-line");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const WORD_STEP = reduced ? 0 : 110; // 단어별 등장 간격(ms)
     let i = 0;
+    let heartbeatShown = false;
 
     function next() {
       if (i >= C.teaserLines.length) return endTeaser();
+
+      // 마지막 문장 직전: 💜 하트가 심장박동처럼 두 번 뛰는 두근두근 연출
+      const isLast = i === C.teaserLines.length - 1;
+      if (isLast && !heartbeatShown && !reduced) {
+        heartbeatShown = true;
+        lineEl.classList.remove("finale", "out");
+        lineEl.textContent = "";
+        const heart = document.createElement("span");
+        heart.className = "teaser-heart";
+        heart.textContent = "💜";
+        lineEl.appendChild(heart);
+        teaserTimer = setTimeout(() => {
+          lineEl.classList.add("out");
+          teaserTimer = setTimeout(next, 300);
+        }, 2100);
+        return;
+      }
+
       const text = C.teaserLines[i];
       const finale = text.includes("JIA");
       lineEl.classList.toggle("finale", finale);
@@ -217,6 +251,15 @@
       }, inMs + holdMs);
     }
     next();
+  }
+
+  function replayTeaser() {
+    clearTimeout(teaserTimer);
+    teaserPlayed = false;
+    $("#teaser-screen").classList.remove("hidden");
+    $("#teaser-end").classList.add("hidden");
+    $("#teaser-line").classList.remove("out");
+    goToStage("teaser"); // goToStage가 playTeaser()를 다시 호출
   }
 
   function endTeaser() {

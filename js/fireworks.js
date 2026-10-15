@@ -22,6 +22,13 @@
     }
     resize();
     window.addEventListener("resize", resize);
+    // 재진입 시 리스너가 누적되지 않도록 stop()에서 함께 정리
+    const section = canvas.closest("section");
+    const onPointerDown = (e) => {
+      if (e.target.closest("button")) return;
+      launch(e.clientX);
+    };
+    section.addEventListener("pointerdown", onPointerDown);
 
     const W = () => canvas.clientWidth;
     const H = () => canvas.clientHeight;
@@ -118,13 +125,13 @@
     setTimeout(() => launch(W() * 0.5), 1100);
     requestAnimationFrame(tick);
 
-    // 화면 탭/클릭하면 그 위치에서 발사
-    canvas.closest("section").addEventListener("pointerdown", (e) => {
-      if (e.target.closest("button")) return;
-      launch(e.clientX);
-    });
-
-    return { stop() { running = false; } };
+    return {
+      stop() {
+        running = false;
+        window.removeEventListener("resize", resize);
+        section.removeEventListener("pointerdown", onPointerDown);
+      },
+    };
   }
 
   // ---------- 색종이 (완료 화면) ----------
