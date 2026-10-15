@@ -4,6 +4,13 @@
 친구들이 아래 순서(관문)를 통과해야 파티 참가 신청을 할 수 있습니다.
 미국 친구들을 초대하는 용도라 **사이트의 모든 문구는 영어**입니다. (파티 일정: 2026년 11월 7일 토요일)
 
+**공유용 주소 (단축 URL):**
+- https://tinyurl.com/JiaBestWorldParty
+- https://tinyurl.com/jia-party
+- 원본: https://kyj5482.github.io/jia-party/
+
+RSVP 신청은 Formspree(https://formspree.io/f/mvkzdker)로 접수되어 이메일로 도착합니다.
+
 1. **🎆 불꽃놀이 인트로** — 캔버스 불꽃놀이 애니메이션과 타이틀 등장
 2. **📸 지아 알아가기** — 지아의 사진 슬라이드쇼 (사진마다 소개 문구)
 3. **⭕❌ 지아 더 알기 퀴즈** — O/X 퀴즈로 지아가 좋아하는 것 맞추기 (기준 점수 통과 필요)
