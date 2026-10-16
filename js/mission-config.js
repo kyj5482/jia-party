@@ -21,6 +21,27 @@ const MISSION_CONFIG = {
   // 팀 전체가 함께 쓰는 힌트 찬스 수 (1~5 권장)
   hintTokens: 3,
 
+  // ---------- 요원 모집 (RPG식 오프닝) ----------
+  recruit: {
+    // PIN 통과 후 터미널 부팅처럼 한 글자씩 타이핑되는 시네마틱
+    bootLines: [
+      "> CONNECTING TO JIA'S SECRET HQ ...",
+      "> ACCESS CODE VERIFIED ✔",
+      "> ALERT! A TREASURE BOX HAS BEEN SEALED",
+      "> 4 MISSIONS STAND BETWEEN YOU AND THE PRIZE",
+      "> HQ CANNOT DO THIS ALONE...",
+      "> AGENT RECRUITMENT PROTOCOL ... ACTIVATED ⚡",
+    ],
+    // 선택 가능한 요원 캐릭터 (한 명이 고르면 다른 친구는 선택 불가)
+    avatars: ["🦄", "🐱", "🦊", "🧜‍♀️", "🦋", "🐰", "🐼", "🐬", "🦉", "⭐", "🐯", "🐸"],
+    // 등록 시 무작위로 부여되는 요원 칭호
+    titles: [
+      "Cipher Queen", "Maze Whisperer", "Night Owl", "Puzzle Ninja",
+      "Firefly Catcher", "Moonstone Hunter", "Shadow Dancer", "Riddle Master",
+      "Star Navigator", "Secret Keeper",
+    ],
+  },
+
   briefing: [
     "Agents, welcome to JIA'S SECRET HQ. 🕵️",
     "Somewhere in this house is a locked treasure box.",

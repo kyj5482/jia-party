@@ -65,6 +65,15 @@ test("HQ PIN은 3~8자리 숫자이다", () => {
   assert.match(MISSION.pin, /^\d{3,8}$/);
 });
 
+test("요원 모집: 부팅 문구/아바타/칭호가 올바르다", () => {
+  const R = MISSION.recruit;
+  assert.ok(R, "recruit 설정이 없음");
+  assert.ok(R.bootLines.length >= 3, "부팅 시네마틱 문구는 3줄 이상");
+  assert.ok(R.avatars.length >= 6, "아바타는 6개 이상 (참가 인원만큼 필요)");
+  assert.strictEqual(new Set(R.avatars).size, R.avatars.length, "아바타가 중복됨");
+  assert.ok(R.titles.length >= 4, "칭호는 4개 이상");
+});
+
 test("힌트 찬스: 토큰 수는 1~5이고 모든 미션에 힌트가 1개 이상 있다", () => {
   assert.ok(MISSION.hintTokens >= 1 && MISSION.hintTokens <= 5, "hintTokens는 1~5");
   MISSION.missions.forEach((m, i) => {

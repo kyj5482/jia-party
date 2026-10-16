@@ -20,18 +20,25 @@
   function loadState() {
     try {
       const st = JSON.parse(localStorage.getItem(KEY)) || {};
-      return { screen: "pin", squad: [], turn: 0, tokens: M.hintTokens, hintsUsed: {}, ...st };
+      const merged = { screen: "pin", squad: [], turn: 0, tokens: M.hintTokens, hintsUsed: {}, ...st };
+      // 예전 저장 형식(이름 문자열 배열) 호환
+      merged.squad = (merged.squad || []).map((s) =>
+        typeof s === "string" ? { name: s, avatar: "🕵️", title: "Agent" } : s
+      );
+      return merged;
     } catch (e) {
       return { screen: "pin", squad: [], turn: 0, tokens: M.hintTokens, hintsUsed: {} };
     }
   }
   function saveState(st) { localStorage.setItem(KEY, JSON.stringify(st)); }
 
-  // 현재 턴의 요원 이름 (offset으로 다음 순번 조회)
+  // 현재 턴의 요원 (offset으로 다음 순번 조회) — 표시는 "아바타 이름"
   function agent(st, offset = 0) {
     if (!st.squad || !st.squad.length) return "AGENT";
-    return st.squad[(st.turn + offset) % st.squad.length];
+    const a = st.squad[(st.turn + offset) % st.squad.length];
+    return `${a.avatar} ${a.name}`;
   }
+  const squadNames = (squad) => squad.map((a) => `${a.avatar} ${a.name}`).join(" · ");
 
   function el(tag, cls, text) {
     const n = document.createElement(tag);
@@ -154,66 +161,157 @@
     body.appendChild(pad);
   }
 
-  // ---------- 스쿼드 등록 (전원 참여의 핵심) ----------
+  // ---------- 스쿼드 모집: 터미널 부팅 시네마틱 → RPG식 캐릭터 생성 ----------
   function renderSquad(st) {
-    body.appendChild(el("h3", "hq-mission-title", "🧑‍🚀 ASSEMBLE YOUR SQUAD"));
-    body.appendChild(el("p", "hq-text",
-      "Type EVERY agent's name. Missions rotate automatically — everyone gets a turn to drive, tap, and type!"));
+    const R = M.recruit || {};
+    const boot = R.bootLines || [];
+    // 이미 모집을 시작했었다면(또는 부팅 문구가 없다면) 바로 모집 화면으로
+    if (!boot.length || (st.squad && st.squad.length)) return renderRecruit(st);
+
+    const term = el("div", "boot-term");
+    body.appendChild(term);
+    const skip = el("button", "hint-btn", "SKIP ≫");
+    body.appendChild(skip);
+
+    let li = 0, timer = null, done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      body.innerHTML = "";
+      renderRecruit(st);
+    }
+    skip.addEventListener("click", finish);
+
+    function typeLine() {
+      if (done) return;
+      if (li >= boot.length) { timer = setTimeout(finish, 900); return; }
+      const line = boot[li];
+      const p = el("p", "boot-line", "");
+      const cursor = el("span", "boot-cursor", "▋");
+      p.appendChild(cursor);
+      term.appendChild(p);
+      let ci = 0;
+      (function tick() {
+        if (done) return;
+        if (ci < line.length) {
+          cursor.before(document.createTextNode(line[ci]));
+          ci++;
+          timer = setTimeout(tick, 26);
+        } else {
+          cursor.remove();
+          li++;
+          timer = setTimeout(typeLine, 450);
+        }
+      })();
+    }
+    typeLine();
+  }
+
+  function renderRecruit(st) {
+    const R = M.recruit || { avatars: ["🕵️"], titles: ["Agent"] };
+    let squad = [...(st.squad || [])];
+    let selAvatar = null;
+
+    body.appendChild(el("h3", "hq-mission-title", "⚡ AGENT RECRUITMENT"));
+    body.appendChild(el("p", "hq-text-sub", "Choose your character, then enter your agent codename."));
+
+    const grid = el("div", "avatar-grid");
+    const avatarBtns = R.avatars.map((a) => {
+      const b = el("button", "avatar-btn", a);
+      b.addEventListener("click", () => {
+        if (b.disabled) return;
+        selAvatar = a;
+        avatarBtns.forEach((x) => x.classList.toggle("sel", x === b));
+      });
+      grid.appendChild(b);
+      return b;
+    });
+    body.appendChild(grid);
 
     const row = el("div", "squad-row");
     const input = el("input", "hq-input squad-input");
-    input.placeholder = "AGENT NAME";
+    input.placeholder = "AGENT CODENAME";
     input.maxLength = 14;
-    const addBtn = el("button", "btn btn-hq squad-add", "ADD");
+    const addBtn = el("button", "btn btn-hq squad-add", "REGISTER");
     row.appendChild(input);
     row.appendChild(addBtn);
     body.appendChild(row);
 
-    const chips = el("div", "squad-chips");
-    body.appendChild(chips);
-    const hint = el("p", "hq-error hidden", "Add at least 2 agents to start!");
-    body.appendChild(hint);
-    const startBtn = el("button", "btn btn-hq", "START BRIEFING ▶");
-    body.appendChild(startBtn);
+    const err = el("p", "hq-error hidden", "");
+    body.appendChild(err);
+    const cardSlot = el("div", "agent-card-slot");
+    body.appendChild(cardSlot);
+    const roster = el("div", "squad-chips");
+    body.appendChild(roster);
+    const deployBtn = el("button", "btn btn-hq btn-big hidden", "DEPLOY SQUAD 🚀");
+    body.appendChild(deployBtn);
 
-    let squad = [...(st.squad || [])];
-
-    function drawChips() {
-      chips.innerHTML = "";
-      squad.forEach((name, i) => {
-        const c = el("span", "chip");
-        c.appendChild(el("span", null, name));
-        const x = el("button", "chip-x", "✕");
-        x.setAttribute("aria-label", `Remove ${name}`);
-        x.addEventListener("click", () => { squad.splice(i, 1); drawChips(); });
-        c.appendChild(x);
-        chips.appendChild(c);
+    function syncTaken() {
+      avatarBtns.forEach((b) => {
+        const taken = squad.some((s) => s.avatar === b.textContent);
+        b.disabled = taken;
+        b.classList.toggle("taken", taken);
+        if (taken) b.classList.remove("sel");
       });
     }
-    function add() {
-      const name = input.value.trim();
-      if (!name || squad.length >= 10) return;
-      squad.push(name);
-      input.value = "";
-      input.focus();
-      drawChips();
+    function redrawRoster() {
+      roster.innerHTML = "";
+      squad.forEach((a, i) => {
+        const c = el("span", "chip");
+        c.appendChild(el("span", null, `${a.avatar} ${a.name}`));
+        const x = el("button", "chip-x", "✕");
+        x.setAttribute("aria-label", `Remove ${a.name}`);
+        x.addEventListener("click", () => {
+          squad.splice(i, 1);
+          syncTaken();
+          redrawRoster();
+          cardSlot.innerHTML = "";
+        });
+        c.appendChild(x);
+        roster.appendChild(c);
+      });
+      deployBtn.classList.toggle("hidden", squad.length < 2);
     }
-    addBtn.addEventListener("click", add);
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") add(); });
-    startBtn.addEventListener("click", () => {
-      if (squad.length < 2) {
-        hint.classList.remove("hidden");
-        return;
-      }
-      render({ ...st, screen: "brief", squad, turn: 0 });
-    });
-    drawChips();
+    function showCard(a) {
+      cardSlot.innerHTML = "";
+      const card = el("div", "agent-card");
+      card.appendChild(el("div", "agent-card-avatar", a.avatar));
+      card.appendChild(el("p", "agent-card-name", `AGENT ${a.name.toUpperCase()}`));
+      card.appendChild(el("p", "agent-card-title", `“${a.title}”`));
+      card.appendChild(el("div", "agent-card-stamp", "REGISTERED ✔"));
+      cardSlot.appendChild(card);
+    }
+    function register() {
+      const name = input.value.trim();
+      if (!selAvatar) { err.textContent = "Pick a character first! 👆"; err.classList.remove("hidden"); return; }
+      if (!name) { err.textContent = "Every agent needs a codename!"; err.classList.remove("hidden"); return; }
+      if (squad.length >= 10) return;
+      err.classList.add("hidden");
+      // 아직 안 쓴 칭호 우선 배정
+      const unused = R.titles.filter((t) => !squad.some((s) => s.title === t));
+      const pool = unused.length ? unused : R.titles;
+      const a = { name, avatar: selAvatar, title: pool[Math.floor(Math.random() * pool.length)] };
+      squad.push(a);
+      input.value = "";
+      selAvatar = null;
+      avatarBtns.forEach((x) => x.classList.remove("sel"));
+      syncTaken();
+      redrawRoster();
+      showCard(a);
+    }
+    addBtn.addEventListener("click", register);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") register(); });
+    deployBtn.addEventListener("click", () => render({ ...st, screen: "brief", squad, turn: 0 }));
+
+    syncTaken();
+    redrawRoster();
   }
 
   // ---------- 브리핑 ----------
   function renderBrief(st) {
     const box = el("div", "hq-card");
-    const lines = [...M.briefing, `Your squad: ${st.squad.join(" · ")} 🤝`];
+    const lines = [...M.briefing, `Your squad: ${squadNames(st.squad)} 🤝`];
     lines.forEach((line, i) => {
       const p = el("p", "hq-brief-line", line);
       p.style.animationDelay = `${i * 0.7}s`;
@@ -320,7 +418,7 @@
     const card = el("div", "hq-card hq-final");
     M.final.message.split("\n").forEach((line) => card.appendChild(el("p", null, line)));
     if (st.squad && st.squad.length) {
-      card.appendChild(el("p", "hq-squad-line", `Agents: ${st.squad.join(" · ")} 🏅`));
+      card.appendChild(el("p", "hq-squad-line", `Agents: ${squadNames(st.squad)} 🏅`));
     }
     body.appendChild(card);
     const combo = el("div", "hq-combo");
