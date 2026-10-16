@@ -19,11 +19,15 @@
 
 html, body { height: 100%; }
 
+/* 더블탭 줌 전면 차단 (여백/캔버스 연타 포함) — 스크롤과 핀치 줌은 유지됨 */
+html { touch-action: manipulation; }
+
 body {
   font-family: "Fredoka", sans-serif;
   color: var(--ink);
   background: var(--paper);
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hidden { display: none !important; }
@@ -677,6 +681,13 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   gap: 14px;
   overflow-y: auto;
   animation: stage-in 0.35s ease both;
+  /* 게임 중 연타로 텍스트가 선택/하이라이트되는 것 방지 (입력창은 예외) */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.game-screen input {
+  user-select: text;
+  -webkit-user-select: text;
 }
 .game-top {
   width: 100%;
