@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jia the Best, Party the Best! 🎉</title>
-  <meta name="description" content="Jia the Best, Party the Best! You're invited to Jia's birthday party — pass the challenges and join in." />
+  <title>Jia's Mystery Sleepover 🌙</title>
+  <meta name="description" content="You're invited to Jia's Mystery Sleepover — pass the challenges, pack your pajamas, and join the adventure." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Patrick+Hand&display=swap" rel="stylesheet" />
@@ -23,15 +23,18 @@
 
   <!-- ① Fireworks intro -->
   <section id="stage-intro" class="stage active">
+    <div class="sky" id="sky" aria-hidden="true"></div>
+    <div class="moon" id="intro-moon" aria-hidden="true">🌙</div>
     <canvas id="fireworks"></canvas>
     <div class="intro-content">
       <p class="intro-sub">YOU ARE INVITED TO</p>
       <h1 class="intro-title">
-        <span class="word w1">JIA&nbsp;THE&nbsp;BEST,</span>
-        <span class="word w2">PARTY&nbsp;THE&nbsp;BEST!</span>
+        <span class="word w1">JIA'S&nbsp;MYSTERY</span>
+        <span class="word w2">SLEEPOVER</span>
       </h1>
+      <p class="intro-tagline">a splash · a secret · a sleepover</p>
       <p class="intro-date" id="intro-date"></p>
-      <button id="btn-enter" class="btn btn-big">🎟️ Enter the Party</button>
+      <button id="btn-enter" class="btn btn-big">🎟️ Enter the Mystery</button>
       <p class="intro-hint">Tap anywhere to launch fireworks!</p>
     </div>
   </section>
@@ -83,8 +86,8 @@
       <button class="btn-skip" id="btn-teaser-skip">Skip ≫</button>
     </div>
     <div class="teaser-end hidden" id="teaser-end">
-      <h2 class="stage-title">What kind of party will it be...? 🤫</h2>
-      <p class="teaser-end-sub">Only three hints. The rest you'll find out at the party!</p>
+      <h2 class="stage-title">What kind of night will it be...? 🤫</h2>
+      <p class="teaser-end-sub">Only four hints. The rest you'll find out at the sleepover!</p>
       <div class="hint-cards" id="hint-cards"></div>
       <button class="btn btn-big" id="btn-to-form">Go to RSVP →</button>
     </div>
@@ -114,6 +117,11 @@
         <label class="radio"><input type="radio" name="attend" value="Maybe" /> Still thinking 🤔</label>
         <label class="radio"><input type="radio" name="attend" value="No" /> Sadly can't make it 😢</label>
       </fieldset>
+      <fieldset>
+        <legend>Staying for the sleepover?</legend>
+        <label class="radio"><input type="radio" name="sleepover" value="Sleeping over" /> Yes — sleeping over! 🌙</label>
+        <label class="radio"><input type="radio" name="sleepover" value="Party only" /> Party only — evening pickup 🚗</label>
+      </fieldset>
       <label>
         <span class="label-title">Allergies / notes</span>
         <textarea name="notes" rows="3" placeholder="e.g. Peanut allergy / Needs to leave at 5 PM"></textarea>
@@ -134,10 +142,16 @@
         <p>⏰ <span id="done-time"></span></p>
         <p>📍 <span id="done-place"></span></p>
       </div>
-      <div class="pool-notice hidden" id="pool-notice">
-        <h3>💦 Wait! One little secret...</h3>
-        <p>Rumor has it you might get wet at this party... Bring these and you won't regret it!</p>
-        <ul id="pool-checklist"></ul>
+      <div class="bring-notice hidden" id="bring-notice">
+        <h3>🎒 Agent packing list</h3>
+        <div class="bring-group hidden" id="bring-pool">
+          <h4>💦 For the splash...</h4>
+          <ul id="pool-checklist"></ul>
+        </div>
+        <div class="bring-group">
+          <h4>🌙 For the night...</h4>
+          <ul id="sleep-checklist"></ul>
+        </div>
       </div>
       <div class="manual-send hidden" id="manual-send">
         <p>Please send your RSVP to Jia's parents using a button below!</p>
@@ -149,8 +163,30 @@
     <canvas id="confetti"></canvas>
   </section>
 
+  <!-- 🔺 Secret HQ (이스터에그: 인트로에서 삼각형을 그리거나 달을 5번 탭) -->
+  <div id="secret-overlay" class="secret-overlay hidden" role="dialog" aria-label="Secret found">
+    <div class="secret-box">
+      <div class="secret-tri">🔺</div>
+      <h2>SECRET FOUND!</h2>
+      <p>You discovered the hidden headquarters.<br />Agents only beyond this point...</p>
+      <button class="btn btn-hq" id="btn-enter-hq">ENTER HQ 🕵️</button>
+      <button class="btn-skip" id="btn-close-secret">Back to the invitation</button>
+    </div>
+  </div>
+
+  <section id="stage-mission" class="stage mission">
+    <header class="hq-header">
+      <span class="hq-badge">TOP SECRET</span>
+      <h2>JIA'S SECRET HQ</h2>
+    </header>
+    <div id="mission-body" class="mission-body"></div>
+    <button class="btn-skip hq-exit" id="btn-exit-hq">← leave HQ</button>
+  </section>
+
   <script src="js/config.js"></script>
+  <script src="js/mission-config.js"></script>
   <script src="js/fireworks.js"></script>
+  <script src="js/mission.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

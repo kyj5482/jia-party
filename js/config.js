@@ -1,28 +1,34 @@
 // ============================================================
-//  Jia the Best, Party the Best! — Settings
+//  Jia's Mystery Sleepover — Settings
 //  Edit this one file to change everything on the invitation.
 //  (이 파일만 수정하면 초대장의 모든 내용이 바뀝니다.)
+//  파티 당일 미션 게임 설정은 js/mission-config.js 에 있습니다.
 // ============================================================
 
 const PARTY_CONFIG = {
   // ---------- Basic info ----------
   childName: "Jia",
-  partyTitle: "Jia the Best, Party the Best!",
+  partyTitle: "Jia's Mystery Sleepover",
   partyDate: "Saturday, November 7, 2026",
-  partyTime: "2:00 PM – 6:00 PM",
+  partyTime: "Starts Sat 2:00 PM · Pickup Sun 10:00 AM",
   partyPlace: "The location will be shared with confirmed guests 💌", // or put the address here
   rsvpDeadline: "Please RSVP by October 31!",
 
-  // Set to true for a pool party → the "bring your swimsuit" checklist
+  // Set to true for a pool party → the pool packing list
   // appears automatically on the final screen.
   isPoolParty: true,
-  poolChecklist: ["Swimsuit 🩱", "Towel 🧺", "Goggles 🥽", "Change of clothes 👕", "Waterproof pouch (optional) 📱"],
+  poolChecklist: ["Swimsuit 🩱", "Towel 🧺", "Goggles 🥽", "Waterproof pouch (optional) 📱"],
+  // 슬립오버 준비물 — 완료 화면에 항상 표시
+  sleepoverChecklist: [
+    "Pajamas 🌙",
+    "Sleeping bag & pillow 🛏️",
+    "Toothbrush 🪥",
+    "Comfy clothes for Sunday 👚",
+    "Your favorite stuffed buddy 🧸",
+  ],
 
   // ---------- RSVP form delivery ----------
-  // Create a free form at https://formspree.io and paste the endpoint here.
-  // Example: "https://formspree.io/f/abcdwxyz"
-  // If left empty (""), buttons to send the RSVP by text message / copy
-  // to clipboard will be shown instead.
+  // Formspree endpoint — RSVP가 이메일로 도착합니다.
   formspreeEndpoint: "https://formspree.io/f/mvkzdker",
   rsvpPhone: "", // 비워두면 문자 보내기 버튼이 표시되지 않음 (문자 수신 안 함)
 
@@ -31,7 +37,7 @@ const PARTY_CONFIG = {
   photos: [
     {
       src: "assets/photos/photo1.svg",
-      caption: "Hi! I'm Jia 👋 and this year's birthday party is going to be EPIC!",
+      caption: "Hi! I'm Jia 👋 and I'm planning something a little... mysterious.",
     },
     {
       src: "assets/photos/photo2.svg",
@@ -43,7 +49,7 @@ const PARTY_CONFIG = {
     },
     {
       src: "assets/photos/photo4.svg",
-      caption: "This party is going to be the best one ever. Pass the challenges and come join me!",
+      caption: "This is my very first sleepover party — and I turned it into a mystery. Think you can solve it?",
     },
   ],
 
@@ -83,15 +89,15 @@ const PARTY_CONFIG = {
   // Each line fills the screen one at a time.
   teaserLines: [
     "This November...",
-    "For one day only,",
-    "a once-in-a-lifetime party begins",
-    "💦 The sound of splashing...?",
-    "🗺️ A treasure hidden somewhere...?",
-    "🔐 A secret behind a locked door...?",
-    "Everything will be revealed",
-    "JIA THE BEST,\nPARTY THE BEST!",
+    "One night.",
+    "A few brave friends.",
+    "💦 A splash before sunset...",
+    "🗺️ A map to something hidden...",
+    "🔐 A box that won't open...",
+    "🌙 And a night you'll never forget",
+    "JIA'S MYSTERY\nSLEEPOVER",
     "And YOU are invited.",
   ],
   // Mystery hint cards shown after the teaser (front shows ??? to build curiosity)
-  teaserHints: ["💦", "🗺️", "🔐"],
+  teaserHints: ["💦", "🗺️", "🔐", "🌙"],
 };

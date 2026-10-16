@@ -68,6 +68,104 @@
   fireworks = JiaFX.startFireworks($("#fireworks"));
   $("#btn-enter").addEventListener("click", () => goToStage("photos"));
 
+  // 밤하늘 별 생성
+  (function makeStars() {
+    const sky = $("#sky");
+    for (let i = 0; i < 42; i++) {
+      const s = document.createElement("span");
+      s.className = "star";
+      s.style.left = Math.random() * 100 + "%";
+      s.style.top = Math.random() * 100 + "%";
+      s.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
+      s.style.animationDuration = (2 + Math.random() * 3).toFixed(2) + "s";
+      const size = 1 + Math.random() * 2;
+      s.style.width = s.style.height = size.toFixed(1) + "px";
+      sky.appendChild(s);
+    }
+  })();
+
+  // ---------- 🔺 이스터에그: Secret HQ ----------
+  // 방법 1: 인트로 화면에서 손가락으로 삼각형(닫힌 도형) 그리기
+  // 방법 2: 달(🌙)을 3.5초 안에 5번 연속 탭
+  const introStage = $("#stage-intro");
+  let drawPts = [];
+  let drawing = false;
+
+  introStage.addEventListener("pointerdown", (e) => {
+    drawing = true;
+    drawPts = [[e.clientX, e.clientY]];
+  });
+  introStage.addEventListener("pointermove", (e) => {
+    if (drawing) drawPts.push([e.clientX, e.clientY]);
+  });
+  function endDraw() {
+    if (drawing && detectTriangle(drawPts)) showSecret();
+    drawing = false;
+    drawPts = [];
+  }
+  introStage.addEventListener("pointerup", endDraw);
+  introStage.addEventListener("pointercancel", endDraw);
+
+  function detectTriangle(pts) {
+    if (pts.length < 12) return false;
+    let len = 0;
+    for (let i = 1; i < pts.length; i++) {
+      len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    }
+    if (len < 200) return false; // 너무 짧은 끄적임은 무시
+    const dEnd = Math.hypot(
+      pts[0][0] - pts[pts.length - 1][0],
+      pts[0][1] - pts[pts.length - 1][1]
+    );
+    if (dEnd > Math.max(90, len * 0.25)) return false; // 닫힌 도형이어야 함
+
+    // 경로를 일정 간격으로 리샘플링한 뒤 급격한 방향 전환(코너) 수 세기
+    const step = len / 36;
+    const rs = [pts[0]];
+    let acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (acc >= step) { rs.push(pts[i]); acc = 0; }
+    }
+    let corners = 0, lastAng = null, cooldown = 0;
+    for (let i = 1; i < rs.length; i++) {
+      const ang = Math.atan2(rs[i][1] - rs[i - 1][1], rs[i][0] - rs[i - 1][0]);
+      if (lastAng !== null && cooldown <= 0) {
+        let d = Math.abs(ang - lastAng);
+        if (d > Math.PI) d = 2 * Math.PI - d;
+        if (d > 0.7) { corners++; cooldown = 3; }
+      }
+      cooldown--;
+      lastAng = ang;
+    }
+    return corners >= 2 && corners <= 5; // 삼각형(모서리 2~3개 감지)이면 통과
+  }
+
+  // 보조 경로: 달 5번 연속 탭
+  let moonTaps = 0, moonTimer = null;
+  $("#intro-moon").addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    moonTaps++;
+    clearTimeout(moonTimer);
+    moonTimer = setTimeout(() => { moonTaps = 0; }, 3500);
+    if (moonTaps >= 5) { moonTaps = 0; showSecret(); }
+  });
+
+  function showSecret() {
+    const overlay = $("#secret-overlay");
+    if (!overlay.classList.contains("hidden")) return;
+    overlay.classList.remove("hidden");
+  }
+  $("#btn-close-secret").addEventListener("click", () => {
+    $("#secret-overlay").classList.add("hidden");
+  });
+  $("#btn-enter-hq").addEventListener("click", () => {
+    $("#secret-overlay").classList.add("hidden");
+    if (fireworks) { fireworks.stop(); fireworks = null; }
+    JiaHQ.open();
+  });
+  $("#btn-exit-hq").addEventListener("click", () => goToStage("intro"));
+
   // ---------- ② 사진 슬라이드 ----------
   let photoIdx = 0;
   const seenPhotos = new Set();
@@ -356,6 +454,7 @@
       `Parent: ${data.parentName}\n` +
       `Phone: ${data.parentPhone}\n` +
       `Attending: ${data.attend}\n` +
+      `Sleepover: ${data.sleepover || "Not sure yet"}\n` +
       `Notes: ${data.notes || "None"}`
     );
   }
@@ -369,15 +468,22 @@
         ? `We'll miss you! Thanks for letting us know — ${C.childName} says let's play together soon 💜`
         : `See you at the party, ${data.childName}! ${C.childName} is SO excited 💜`;
 
-    if (C.isPoolParty && data.attend !== "No") {
-      $("#pool-notice").classList.remove("hidden");
-      const ul = $("#pool-checklist");
-      ul.innerHTML = "";
-      C.poolChecklist.forEach((item) => {
-        const li = document.createElement("li");
-        li.textContent = item;
-        ul.appendChild(li);
-      });
+    if (data.attend !== "No") {
+      $("#bring-notice").classList.remove("hidden");
+      const fill = (sel, items) => {
+        const ul = $(sel);
+        ul.innerHTML = "";
+        items.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          ul.appendChild(li);
+        });
+      };
+      if (C.isPoolParty) {
+        $("#bring-pool").classList.remove("hidden");
+        fill("#pool-checklist", C.poolChecklist);
+      }
+      fill("#sleep-checklist", C.sleepoverChecklist);
     }
 
     rsvpDone = true; // 완료 후 단계 이동 잠금

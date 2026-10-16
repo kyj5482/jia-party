@@ -102,6 +102,47 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   background: radial-gradient(ellipse at bottom, var(--night-2) 0%, var(--night-1) 70%);
   position: relative;
   padding-top: 48px;
+  touch-action: none; /* 이스터에그 제스처(삼각형 그리기)를 위해 브라우저 제스처 차단 */
+  overflow: hidden;
+}
+
+/* 밤하늘: 반짝이는 별 + 달 */
+.sky { position: absolute; inset: 0; pointer-events: none; }
+.sky .star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.4); }
+}
+.moon {
+  position: absolute;
+  top: 7%;
+  right: 9%;
+  font-size: clamp(2.6rem, 9vw, 4.2rem);
+  filter: drop-shadow(0 0 24px rgba(253, 230, 138, 0.5));
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 3;
+  animation: moon-float 7s ease-in-out infinite;
+}
+@keyframes moon-float {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50%      { transform: translateY(-10px) rotate(4deg); }
+}
+
+.intro-tagline {
+  color: #a78bfa;
+  letter-spacing: 0.28em;
+  font-size: clamp(0.72rem, 2.6vw, 0.95rem);
+  margin: 4px 0 10px;
+  text-transform: uppercase;
+  animation: fade-up 1s 1.9s ease both;
 }
 #fireworks {
   position: absolute;
@@ -356,7 +397,7 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 .teaser-end .stage-title { color: #fff; }
 .teaser-end-sub { color: #c9bfff; font-size: 1.1rem; }
 
-.hint-cards { display: flex; gap: 18px; margin: 10px 0 20px; }
+.hint-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin: 10px 0 20px; }
 .hint-card {
   width: 92px; height: 120px;
   perspective: 600px;
@@ -467,30 +508,260 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   font-size: 1.08rem;
 }
 
-.pool-notice {
+.bring-notice {
   width: 100%;
-  background: linear-gradient(135deg, #e0f2fe, #cffafe);
-  border: 2px dashed var(--sky);
+  background: linear-gradient(135deg, #ede9fe, #e0f2fe);
+  border: 2px dashed var(--purple);
   border-radius: 14px;
   padding: 18px 20px;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.pool-notice h3 { color: #0369a1; margin-bottom: 8px; }
-.pool-notice p { margin-bottom: 10px; font-size: 0.98rem; }
-.pool-notice ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
-.pool-notice li {
+.bring-notice h3 { color: var(--purple-deep); }
+.bring-group h4 { color: #0369a1; margin-bottom: 8px; font-size: 1rem; }
+.bring-group ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.bring-group li {
   background: #fff;
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 0.95rem;
-  box-shadow: 0 2px 6px rgba(3, 105, 161, 0.12);
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.12);
 }
 
 .manual-send { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .copy-done { color: #059669; font-size: 0.95rem; }
 
+/* ============================================================
+   🔺 Secret HQ (이스터에그 미션 게임)
+   ============================================================ */
+
+.shake { animation: shake 0.4s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+.secret-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 3, 18, 0.92);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.secret-box {
+  text-align: center;
+  color: #e9e4ff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  animation: secret-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+@keyframes secret-pop {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.secret-tri { font-size: 3.4rem; animation: moon-float 3s ease-in-out infinite; }
+.secret-box h2 {
+  letter-spacing: 0.2em;
+  background: linear-gradient(135deg, #fbbf24, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.secret-box p { color: #b4a8de; line-height: 1.5; }
+
+#stage-mission {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(139, 92, 246, 0.05) 34px 36px),
+    radial-gradient(ellipse at top, #1b1140 0%, #090617 70%);
+  color: #e9e4ff;
+  justify-content: flex-start;
+  padding-top: 36px;
+  position: relative;
+}
+.hq-header { text-align: center; margin-bottom: 22px; }
+.hq-badge {
+  display: inline-block;
+  border: 2px solid #f87171;
+  color: #f87171;
+  padding: 2px 12px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  transform: rotate(-3deg);
+  margin-bottom: 10px;
+}
+.hq-header h2 {
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  letter-spacing: 0.12em;
+  color: #fff;
+  text-shadow: 0 0 24px rgba(139, 92, 246, 0.7);
+}
+.mission-body {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.hq-text { color: #c9bfff; line-height: 1.55; text-align: center; }
+.hq-progress { color: #8b7fc0; letter-spacing: 0.25em; font-size: 0.8rem; }
+.hq-mission-title { color: #fbbf24; font-size: 1.3rem; text-align: center; }
+
+.hq-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 14px;
+  padding: 20px 22px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.6;
+}
+.hq-card p { margin: 2px 0; }
+.hq-puzzle { font-size: 1.08rem; white-space: pre-wrap; }
+.hq-clue { text-align: center; font-size: 1.1rem; border-color: #34d399; }
+.hq-final { text-align: center; font-size: 1.1rem; border-color: #fbbf24; }
+
+.hq-brief-line { opacity: 0; animation: fade-up 0.7s ease both; }
+
+.btn-hq {
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  letter-spacing: 0.1em;
+}
+
+.hq-input {
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.3rem;
+  text-align: center;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  width: min(300px, 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(139, 92, 246, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  outline: none;
+}
+.hq-input:focus { border-color: #c4b5fd; }
+.hq-error { color: #fb7185; font-size: 0.95rem; }
+
+.hq-stamp {
+  border: 3px solid #34d399;
+  color: #34d399;
+  padding: 6px 18px;
+  border-radius: 8px;
+  letter-spacing: 0.2em;
+  transform: rotate(-2deg);
+  font-size: 1.05rem;
+}
+.hq-stamp-final { border-color: #fbbf24; color: #fbbf24; }
+
+.hq-combo { display: flex; gap: 12px; }
+.hq-digit {
+  width: 58px; height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  background: #fff;
+  color: var(--purple-deep);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.hq-confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hq-exit { position: absolute; bottom: 20px; left: 20px; }
+
+/* PIN 패드 */
+.pin-dots { display: flex; gap: 14px; }
+.pin-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid #8b7fc0;
+}
+.pin-dot.on { background: #fbbf24; border-color: #fbbf24; }
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 76px);
+  gap: 12px;
+}
+.pin-key {
+  height: 64px;
+  font-family: inherit;
+  font-size: 1.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background: rgba(255, 255, 255, 0.07);
+  color: #e9e4ff;
+  cursor: pointer;
+}
+.pin-key:active { background: rgba(139, 92, 246, 0.4); }
+
+/* 미로 */
+.maze-wrap { border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
+.maze-canvas { display: block; }
+.dpad {
+  display: grid;
+  grid-template-areas: ". up ." "left down right";
+  gap: 10px;
+}
+.dpad-up { grid-area: up; }
+.dpad-down { grid-area: down; }
+.dpad-left { grid-area: left; }
+.dpad-right { grid-area: right; }
+.dpad-btn {
+  width: 72px; height: 60px;
+  font-size: 1.6rem;
+  border-radius: 14px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background: rgba(255, 255, 255, 0.09);
+  color: #e9e4ff;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.dpad-btn:active { background: rgba(139, 92, 246, 0.45); }
+
+/* 시몬 (반딧불) */
+.simon-board {
+  display: grid;
+  grid-template-columns: repeat(2, 120px);
+  gap: 14px;
+}
+.simon-pad {
+  height: 120px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--pad-color) 28%, #0d0a1e);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--pad-color) 55%, transparent);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  touch-action: manipulation;
+}
+.simon-pad.lit {
+  background: var(--pad-color);
+  box-shadow: 0 0 34px var(--pad-color);
+  transform: scale(1.05);
+}
+.simon-status { color: #c9bfff; min-height: 1.4em; }
+.simon-round { color: #8b7fc0; letter-spacing: 0.2em; font-size: 0.85rem; }
+
 @media (max-width: 480px) {
   .photo-nav { width: 38px; height: 38px; font-size: 1.6rem; }
   .btn-ox { width: 78px; height: 78px; font-size: 2.2rem; }
   .hint-card { width: 78px; height: 104px; }
+  .simon-board { grid-template-columns: repeat(2, 104px); }
+  .simon-pad { height: 104px; }
+  .pin-pad { grid-template-columns: repeat(3, 68px); }
 }
