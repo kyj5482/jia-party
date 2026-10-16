@@ -2,9 +2,9 @@
 //  Jia's Secret HQ — 파티 당일 미션 게임 엔진
 //  (초대장 첫 화면의 이스터에그로 열림 — main.js 참고)
 //
-//  전원 참여 설계: 입장 후 스쿼드(참가자 이름)를 등록하면
-//  미로 조종, 시몬 탭, 답 입력, 봉투 코드 입력을 모두
-//  돌아가면서 맡습니다 (턴은 자동 로테이션).
+//  - 전원 참여: 스쿼드 등록 후 조작 담당 자동 로테이션
+//  - 미션 흐름: 브리핑 화면 → MISSION START! → 전체 화면 몰입 모드
+//  - 힌트 찬스: 팀 공용 토큰으로 단계별 힌트 공개 + 오답 3회 자비
 // ============================================================
 
 (function () {
@@ -232,14 +232,39 @@
     render({ ...st, screen: "clue" });
   }
 
+  // 미션 브리핑 화면: 정보를 읽고 MISSION START! 를 눌러야 게임 시작
   function renderMission(st) {
     const ms = M.missions[st.idx];
     body.appendChild(el("p", "hq-progress", `MISSION ${st.idx + 1} / ${M.missions.length}`));
     body.appendChild(el("h3", "hq-mission-title", ms.title));
-    body.appendChild(el("p", "hq-text", ms.intro));
-    if (ms.kind === "maze") renderMaze(st, ms);
-    if (ms.kind === "code") renderCode(st, ms);
-    if (ms.kind === "simon") renderSimon(st, ms);
+    body.appendChild(el("p", "hq-progress",
+      ms.kind === "code" ? "🖊️ WHITEBOARD MISSION" : "📱 TABLET MISSION"));
+    const card = el("div", "hq-card");
+    card.appendChild(el("p", null, ms.intro));
+    body.appendChild(card);
+    const btn = el("button", "btn btn-hq btn-big", "MISSION START! 🚀");
+    btn.addEventListener("click", () => openGame(st, ms));
+    body.appendChild(btn);
+  }
+
+  // 전체 화면 몰입 모드로 게임 열기
+  function openGame(st, ms) {
+    const screen = el("div", "game-screen");
+    const top = el("div", "game-top");
+    top.appendChild(el("span", "game-title", ms.title));
+    const quit = el("button", "game-quit", "✕");
+    quit.setAttribute("aria-label", "Back to mission briefing");
+    quit.addEventListener("click", () => { screen.remove(); render(st); });
+    top.appendChild(quit);
+    screen.appendChild(top);
+    const area = el("div", "game-area");
+    screen.appendChild(area);
+    document.body.appendChild(screen);
+
+    const onDone = (newSt) => { screen.remove(); completeMission(newSt); };
+    if (ms.kind === "maze") gameMaze(st, ms, area, screen, onDone);
+    if (ms.kind === "code") gameCode(st, ms, area, onDone);
+    if (ms.kind === "simon") gameSimon(st, ms, area, onDone);
   }
 
   // ---------- 성공 → 봉투 힌트 ----------
@@ -302,9 +327,9 @@
     }
   }
 
-  // ---------- 미션: 안개 미로 (조종자 교대) ----------
-  function renderMaze(st, ms) {
-    const SWITCH_EVERY = 12; // 이 걸음 수마다 조종자 교대 (대형 미로라 간격을 늘림)
+  // ---------- 게임: 안개 미로 (조종자 교대) ----------
+  function gameMaze(st, ms, area, screen, onDone) {
+    const SWITCH_EVERY = 12; // 이 걸음 수마다 조종자 교대
     const grid = ms.maze.map((r) => [...r]);
     const H = grid.length, W = grid[0].length;
     let py, px;
@@ -312,18 +337,18 @@
     const visited = new Set([`${py},${px}`]);
     let moves = 0;
     let driverOff = 0; // 교대 횟수 (턴 로테이션 오프셋)
+    let finished = false;
 
     const badge = agentBadge("🧭", "DRIVER", agent(st, driverOff));
-    body.appendChild(badge);
-    body.appendChild(hintBar(st, ms));
+    area.appendChild(badge);
 
     const wrap = el("div", "maze-wrap");
     const cv = el("canvas", "maze-canvas");
     wrap.appendChild(cv);
-    body.appendChild(wrap);
+    area.appendChild(wrap);
 
     const ctx = cv.getContext("2d");
-    const CELL = Math.min(26, Math.floor(Math.min(420, window.innerWidth - 60) / W));
+    const CELL = Math.min(28, Math.floor(Math.min(480, window.innerWidth - 40) / W));
     cv.width = W * CELL * devicePixelRatio;
     cv.height = H * CELL * devicePixelRatio;
     cv.style.width = W * CELL + "px";
@@ -358,14 +383,6 @@
       ctx.fillText("🔦", px * CELL + CELL / 2, py * CELL + CELL / 2 + 1);
     }
 
-    // 조종자 교대 카드
-    const passCard = el("div", "pass-card hidden");
-    const passText = el("p", null, "");
-    const passBtn = el("button", "btn btn-hq", "I have the tablet! ▶");
-    passCard.appendChild(el("div", "pass-emoji", "🔄"));
-    passCard.appendChild(passText);
-    passCard.appendChild(passBtn);
-
     const pad = el("div", "dpad");
     [["↑", -1, 0], ["←", 0, -1], ["→", 0, 1], ["↓", 1, 0]].forEach(([label, dy, dx]) => {
       const b = el("button",
@@ -374,23 +391,41 @@
       b.addEventListener("click", () => move(dy, dx));
       pad.appendChild(b);
     });
-    body.appendChild(pad);
-    body.appendChild(passCard);
+    area.appendChild(pad);
+    area.appendChild(hintBar(st, ms));
+
+    // 조종자 교대: 화면 중앙 모달 + 잠금 해제 지연으로 오조작 방지
+    const passOverlay = el("div", "pass-overlay hidden");
+    const passCard = el("div", "pass-card");
+    const passText = el("p", null, "");
+    const passBtn = el("button", "btn btn-hq", "I have the tablet! ▶");
+    passCard.appendChild(el("div", "pass-emoji", "🔄"));
+    passCard.appendChild(passText);
+    passCard.appendChild(passBtn);
+    passOverlay.appendChild(passCard);
+    screen.appendChild(passOverlay);
 
     function switchDriver() {
       driverOff++;
       moves = 0;
       passText.textContent = `SWITCH! Pass the tablet to ${agent(st, driverOff)} 👐`;
-      pad.classList.add("hidden");
-      passCard.classList.remove("hidden");
+      passOverlay.classList.remove("hidden");
+      // 이동 버튼 연타 중 실수로 눌리지 않도록 1.2초간 잠금
+      passBtn.disabled = true;
+      passBtn.textContent = "Passing the tablet...";
+      setTimeout(() => {
+        passBtn.disabled = false;
+        passBtn.textContent = "I have the tablet! ▶";
+      }, 1200);
     }
     passBtn.addEventListener("click", () => {
-      passCard.classList.add("hidden");
-      pad.classList.remove("hidden");
+      if (passBtn.disabled) return;
+      passOverlay.classList.add("hidden");
       badge.querySelector(".agent-name").textContent = agent(st, driverOff);
     });
 
     function move(dy, dx) {
+      if (finished || !passOverlay.classList.contains("hidden")) return;
       const ny = py + dy, nx = px + dx;
       if (grid[ny] === undefined || grid[ny][nx] === "#") {
         wrap.classList.add("shake");
@@ -402,7 +437,8 @@
       moves++;
       draw();
       if (grid[py][px] === "K") {
-        setTimeout(() => completeMission({ ...st, turn: st.turn + driverOff + 1 }), 450);
+        finished = true;
+        setTimeout(() => onDone({ ...st, turn: st.turn + driverOff + 1 }), 450);
         return;
       }
       if (moves >= SWITCH_EVERY) switchDriver();
@@ -410,29 +446,29 @@
     draw();
   }
 
-  // ---------- 미션: 코드/수수께끼 입력 (서기 지정) ----------
-  function renderCode(st, ms) {
-    body.appendChild(agentBadge("⌨️", "SCRIBE", agent(st)));
-    body.appendChild(el("p", "hq-text-sub",
+  // ---------- 게임: 코드/수수께끼 입력 (서기 지정) ----------
+  function gameCode(st, ms, area, onDone) {
+    area.appendChild(agentBadge("⌨️", "SCRIBE", agent(st)));
+    area.appendChild(el("p", "hq-text-sub",
       `${agent(st)} types — but only what the WHOLE squad agrees on!`));
     if (ms.body) {
       const card = el("div", "hq-card hq-puzzle");
       ms.body.split("\n").forEach((line) => card.appendChild(el("p", null, line || " ")));
-      body.appendChild(card);
+      area.appendChild(card);
     }
     const bar = hintBar(st, ms);
-    body.appendChild(bar);
+    area.appendChild(bar);
     const input = el("input", "hq-input");
     input.placeholder = "YOUR ANSWER";
     input.autocapitalize = "characters";
-    body.appendChild(input);
+    area.appendChild(input);
     const err = el("p", "hq-error hidden", "Not quite — put your heads together and try again!");
-    body.appendChild(err);
+    area.appendChild(err);
     const btn = el("button", "btn btn-hq", "SUBMIT ▶");
     let wrongCount = 0;
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.answer)) {
-        completeMission({ ...st, turn: st.turn + 1 });
+        onDone({ ...st, turn: st.turn + 1 });
       } else {
         wrongCount++;
         // HQ 자비: 오답 3번마다 무료 힌트 1개 공개
@@ -447,22 +483,21 @@
         setTimeout(() => input.classList.remove("shake"), 450);
       }
     });
-    body.appendChild(btn);
+    area.appendChild(btn);
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") btn.click(); });
   }
 
-  // ---------- 미션: 반딧불 기억 게임 (라운드마다 탭 담당 교대) ----------
-  function renderSimon(st, ms) {
+  // ---------- 게임: 반딧불 기억 게임 (라운드마다 탭 담당 교대) ----------
+  function gameSimon(st, ms, area, onDone) {
     const COLORS = ["#8b5cf6", "#f472b6", "#38bdf8", "#fbbf24"];
     let seq = [];
     let inputPos = 0;
     let accepting = false;
 
     const badge = agentBadge("🔆", "TAPPER", agent(st));
-    body.appendChild(badge);
-    body.appendChild(hintBar(st, ms));
+    area.appendChild(badge);
     const status = el("p", "simon-status", "Watch the fireflies... ✨");
-    body.appendChild(status);
+    area.appendChild(status);
     const board = el("div", "simon-board");
     const pads = COLORS.map((color, i) => {
       const p = el("button", "simon-pad");
@@ -476,7 +511,7 @@
             accepting = false;
             if (seq.length >= ms.rounds) {
               status.textContent = "Signal decoded! 🎉";
-              setTimeout(() => completeMission({ ...st, turn: st.turn + ms.rounds }), 800);
+              setTimeout(() => onDone({ ...st, turn: st.turn + ms.rounds }), 800);
             } else {
               status.textContent = `Round ${seq.length} clear! Pass the tablet...`;
               setTimeout(nextRound, 1400);
@@ -491,9 +526,10 @@
       board.appendChild(p);
       return p;
     });
-    body.appendChild(board);
+    area.appendChild(board);
     const round = el("p", "simon-round", "");
-    body.appendChild(round);
+    area.appendChild(round);
+    area.appendChild(hintBar(st, ms));
 
     function tapper() { return agent(st, seq.length - 1); }
     function flash(pad) {

@@ -661,6 +661,68 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   line-height: 1;
 }
 
+/* 전체 화면 몰입 게임 모드 */
+.game-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(139, 92, 246, 0.05) 34px 36px),
+    radial-gradient(ellipse at top, #1b1140 0%, #090617 70%);
+  color: #e9e4ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 16px 24px;
+  gap: 14px;
+  overflow-y: auto;
+  animation: stage-in 0.35s ease both;
+}
+.game-top {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.game-title { color: #fbbf24; letter-spacing: 0.08em; font-size: 1rem; }
+.game-quit {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+.game-area {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  justify-content: center;
+}
+
+/* 교대 안내: 화면 중앙 모달 (뒤의 이동 버튼을 완전히 가림) */
+.pass-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: rgba(5, 3, 18, 0.8);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.pass-overlay .pass-card { animation: secret-pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.pass-card .btn:disabled { opacity: 0.5; cursor: default; }
+
 /* 💡 힌트 찬스 */
 .hint-bar { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .hint-tokens { color: #fbbf24; letter-spacing: 0.18em; font-size: 0.82rem; }
