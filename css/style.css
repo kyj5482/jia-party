@@ -329,25 +329,6 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) {
   .teaser-line .tw { animation: none; opacity: 1; transform: none; }
 }
-
-/* 마지막 문장 직전의 두근두근 하트 */
-.teaser-heart {
-  display: inline-block;
-  font-size: clamp(3.2rem, 15vw, 5.5rem);
-  animation: heart-in 0.25s ease-out, heartbeat 1s ease-in-out 2 0.25s;
-  filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.55));
-}
-@keyframes heart-in {
-  from { opacity: 0; transform: scale(0.6); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.55)); }
-  15%      { transform: scale(1.35); filter: drop-shadow(0 0 42px rgba(196, 170, 255, 0.95)); }
-  30%      { transform: scale(1); }
-  45%      { transform: scale(1.28); filter: drop-shadow(0 0 34px rgba(196, 170, 255, 0.85)); }
-  60%      { transform: scale(1); }
-}
 .btn-skip {
   position: absolute;
   bottom: 28px; right: 24px;
