@@ -579,6 +579,8 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   color: transparent;
 }
 .secret-box p { color: #b4a8de; line-height: 1.5; }
+/* .btn-skip은 티저용 절대배치 — 오버레이 안에서는 일반 흐름으로 */
+.secret-box .btn-skip { position: static; margin-top: 4px; }
 
 #stage-mission {
   background:
