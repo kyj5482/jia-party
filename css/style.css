@@ -663,6 +663,38 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 .boot-cursor { animation: cursor-blink 0.8s steps(1) infinite; }
 @keyframes cursor-blink { 50% { opacity: 0; } }
 
+/* HQ 입장 플리커 (지지직 접속 연출) */
+.hq-flicker { animation: hq-flicker 0.95s steps(2) both; }
+@keyframes hq-flicker {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  28% { opacity: 0.25; }
+  40% { opacity: 1; }
+  52% { opacity: 0.4; }
+  64% { opacity: 1; }
+  78% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* 카드 안에서 타이핑되는 본문 (터미널 초록이 아닌 카드 색상) */
+.type-par {
+  margin: 2px 0;
+  line-height: 1.65;
+}
+.type-par .boot-cursor { color: #fbbf24; }
+
+/* 타이핑 완료 후 나타나는 입력 UI 묶음 */
+.pin-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  animation: fade-up 0.4s ease both;
+}
+.pin-dot.ok { background: #34d399; border-color: #34d399; box-shadow: 0 0 12px rgba(52, 211, 153, 0.7); }
+.gate-prompt { text-align: left; }
+
 /* 요원 캐릭터 선택 */
 .avatar-grid {
   display: grid;
@@ -934,6 +966,11 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   color: var(--purple-deep);
   border-radius: 10px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  animation: digit-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+@keyframes digit-in {
+  from { opacity: 0; transform: scale(0.2) rotate(-18deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
 }
 
 .hq-confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }

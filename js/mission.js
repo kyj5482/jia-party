@@ -118,7 +118,66 @@
     return wrap;
   }
 
+  // ---------- 시네마틱 타이프라이터 (RPG 대화창 방식) ----------
+  // 글자가 한 자씩 타이핑되고, 화면을 탭하면 즉시 완성(fast-forward).
+  // 반환된 promise가 끝난 뒤 버튼류를 보여주는 패턴으로 사용.
+  let cancelTyping = null;
+  function typeLines(lines, { container, cls = "boot-line", charMs = 24, lineMs = 380 } = {}) {
+    let finished = false;
+    let timer = null;
+    const els = [];
+    let resolveFn;
+    const promise = new Promise((res) => { resolveFn = res; });
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      lines.forEach((line, i) => {
+        if (els[i]) els[i].textContent = line;
+        else { const p = el("p", cls, line); container.appendChild(p); els[i] = p; }
+      });
+      body.removeEventListener("pointerdown", onTap);
+      resolveFn();
+    }
+    const onTap = () => finish();
+    body.addEventListener("pointerdown", onTap);
+    cancelTyping = () => {
+      finished = true;
+      clearTimeout(timer);
+      body.removeEventListener("pointerdown", onTap);
+    };
+
+    let li = 0;
+    function nextLine() {
+      if (finished) return;
+      if (li >= lines.length) return finish();
+      const line = lines[li];
+      const p = el("p", cls, "");
+      const cursor = el("span", "boot-cursor", "▋");
+      p.appendChild(cursor);
+      container.appendChild(p);
+      els[li] = p;
+      let ci = 0;
+      (function tick() {
+        if (finished) return;
+        if (ci < line.length) {
+          cursor.before(document.createTextNode(line[ci]));
+          ci++;
+          timer = setTimeout(tick, charMs);
+        } else {
+          cursor.remove();
+          li++;
+          timer = setTimeout(nextLine, lineMs);
+        }
+      })();
+    }
+    nextLine();
+    return promise;
+  }
+
   function render(st) {
+    if (cancelTyping) { cancelTyping(); cancelTyping = null; }
     saveState(st);
     body.innerHTML = "";
     if (st.screen === "pin") return renderPin(st);
@@ -130,9 +189,13 @@
     if (st.screen === "final") return renderFinal(st);
   }
 
-  // ---------- PIN 입장 ----------
+  // ---------- PIN 입장 (시네마틱) ----------
   function renderPin(st) {
-    body.appendChild(el("p", "hq-text", "Enter the agent access code:"));
+    const term = el("div", "boot-term");
+    body.appendChild(term);
+    const ui = el("div", "pin-ui hidden");
+    body.appendChild(ui);
+
     const dots = el("div", "pin-dots");
     const dotEls = [];
     for (let i = 0; i < M.pin.length; i++) {
@@ -140,16 +203,25 @@
       dots.appendChild(d);
       dotEls.push(d);
     }
-    body.appendChild(dots);
+    ui.appendChild(dots);
 
     let entered = "";
+    let locked = false;
     const pad = el("div", "pin-pad");
     "123456789⌫0✓".split("").forEach((k) => {
       const b = el("button", "pin-key", k);
       b.addEventListener("click", () => {
+        if (locked) return;
         if (k === "⌫") entered = entered.slice(0, -1);
         else if (k === "✓") {
-          if (entered === M.pin) return render({ ...st, screen: "squad" });
+          if (entered === M.pin) {
+            // 접속 승인 연출: 점이 초록으로 바뀌고 승인 문구가 타이핑된 뒤 진행
+            locked = true;
+            dotEls.forEach((d) => d.classList.add("ok"));
+            typeLines(["> ACCESS CODE VERIFIED ✔  WELCOME, AGENTS."], { container: term })
+              .then(() => setTimeout(() => render({ ...st, screen: "squad" }), 650));
+            return;
+          }
           dots.classList.add("shake");
           setTimeout(() => dots.classList.remove("shake"), 450);
           entered = "";
@@ -158,7 +230,10 @@
       });
       pad.appendChild(b);
     });
-    body.appendChild(pad);
+    ui.appendChild(pad);
+
+    typeLines(["> IDENTIFY YOURSELVES, AGENTS.", "> ENTER ACCESS CODE:"], { container: term })
+      .then(() => ui.classList.remove("hidden"));
   }
 
   // ---------- 스쿼드 모집: 터미널 부팅 시네마틱 → RPG식 캐릭터 생성 ----------
@@ -170,42 +245,12 @@
 
     const term = el("div", "boot-term");
     body.appendChild(term);
-    const skip = el("button", "hint-btn", "SKIP ≫");
-    body.appendChild(skip);
-
-    let li = 0, timer = null, done = false;
-    function finish() {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      body.innerHTML = "";
-      renderRecruit(st);
-    }
-    skip.addEventListener("click", finish);
-
-    function typeLine() {
-      if (done) return;
-      if (li >= boot.length) { timer = setTimeout(finish, 900); return; }
-      const line = boot[li];
-      const p = el("p", "boot-line", "");
-      const cursor = el("span", "boot-cursor", "▋");
-      p.appendChild(cursor);
-      term.appendChild(p);
-      let ci = 0;
-      (function tick() {
-        if (done) return;
-        if (ci < line.length) {
-          cursor.before(document.createTextNode(line[ci]));
-          ci++;
-          timer = setTimeout(tick, 26);
-        } else {
-          cursor.remove();
-          li++;
-          timer = setTimeout(typeLine, 450);
-        }
-      })();
-    }
-    typeLine();
+    typeLines(boot, { container: term, charMs: 26, lineMs: 450 }).then(() => {
+      setTimeout(() => {
+        body.innerHTML = "";
+        renderRecruit(st);
+      }, 800);
+    });
   }
 
   function renderRecruit(st) {
@@ -308,20 +353,16 @@
     redrawRoster();
   }
 
-  // ---------- 브리핑 ----------
+  // ---------- 브리핑 (시네마틱) ----------
   function renderBrief(st) {
-    const box = el("div", "hq-card");
-    const lines = [...M.briefing, `Your squad: ${squadNames(st.squad)} 🤝`];
-    lines.forEach((line, i) => {
-      const p = el("p", "hq-brief-line", line);
-      p.style.animationDelay = `${i * 0.7}s`;
-      box.appendChild(p);
-    });
+    const box = el("div", "boot-term");
     body.appendChild(box);
-    const btn = el("button", "btn btn-hq hq-brief-line", "ACCEPT MISSION ▶");
-    btn.style.animationDelay = `${lines.length * 0.7}s`;
+    const btn = el("button", "btn btn-hq hidden", "ACCEPT MISSION ▶");
     btn.addEventListener("click", () => render({ ...st, screen: "mission", idx: 0 }));
     body.appendChild(btn);
+    const lines = [...M.briefing, `YOUR SQUAD: ${squadNames(st.squad)} 🤝`];
+    typeLines(lines, { container: box, charMs: 22, lineMs: 420 })
+      .then(() => btn.classList.remove("hidden"));
   }
 
   // ---------- 미션 공통 ----------
@@ -338,11 +379,12 @@
     body.appendChild(el("span", "type-chip",
       ms.kind === "code" ? "🖊️ WHITEBOARD MISSION" : "📱 TABLET MISSION"));
     const card = el("div", "hq-card hq-intro");
-    card.appendChild(el("p", null, ms.intro));
     body.appendChild(card);
-    const btn = el("button", "btn btn-hq btn-big", "MISSION START! 🚀");
+    const btn = el("button", "btn btn-hq btn-big hidden", "MISSION START! 🚀");
     btn.addEventListener("click", () => openGame(st, ms));
     body.appendChild(btn);
+    typeLines([ms.intro], { container: card, cls: "type-par", charMs: 16 })
+      .then(() => btn.classList.remove("hidden"));
   }
 
   // 전체 화면 몰입 모드로 게임 열기
@@ -378,11 +420,12 @@
     const ms = M.missions[st.idx];
     body.appendChild(el("div", "hq-stamp", "✔ MISSION CLEARED"));
     const card = el("div", "hq-card hq-clue");
-    card.appendChild(el("p", null, ms.clue));
     body.appendChild(card);
-    const btn = el("button", "btn btn-hq", "We found the envelope! ▶");
+    const btn = el("button", "btn btn-hq hidden", "We found the envelope! ▶");
     btn.addEventListener("click", () => render({ ...st, screen: "gate" }));
     body.appendChild(btn);
+    typeLines(["INCOMING TRANSMISSION FROM HQ...", ms.clue], { container: card, cls: "type-par", charMs: 18 })
+      .then(() => btn.classList.remove("hidden"));
   }
 
   // ---------- 봉투 코드 입력 → 다음 미션 ----------
@@ -390,14 +433,16 @@
     const ms = M.missions[st.idx];
     body.appendChild(el("h3", "hq-mission-title", "🔒 SECURITY CHECK"));
     body.appendChild(agentBadge("🔑", "UNLOCKER", agent(st)));
-    body.appendChild(el("p", "hq-text",
-      `${ms.gatePrompt} (${agent(st)} types — but the whole squad checks the spelling!)`));
+    const promptBox = el("div", "hq-card gate-prompt");
+    body.appendChild(promptBox);
+    const ui = el("div", "pin-ui hidden");
+    body.appendChild(ui);
     const input = el("input", "hq-input");
     input.placeholder = "SECRET WORD";
     input.autocapitalize = "characters";
-    body.appendChild(input);
+    ui.appendChild(input);
     const err = el("p", "hq-error hidden", "Hmm, that's not it. Check the envelope again!");
-    body.appendChild(err);
+    ui.appendChild(err);
     const btn = el("button", "btn btn-hq", "UNLOCK ▶");
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.gateCode)) {
@@ -408,29 +453,45 @@
         setTimeout(() => input.classList.remove("shake"), 450);
       }
     });
-    body.appendChild(btn);
+    ui.appendChild(btn);
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") btn.click(); });
+    typeLines([`${ms.gatePrompt}`, `(${agent(st)} types — the whole squad checks the spelling!)`],
+      { container: promptBox, cls: "type-par", charMs: 16 })
+      .then(() => ui.classList.remove("hidden"));
   }
 
-  // ---------- 최종 ----------
+  // ---------- 최종 (시네마틱 피날레) ----------
   function renderFinal(st) {
     body.appendChild(el("div", "hq-stamp hq-stamp-final", "★ ALL MISSIONS CLEARED ★"));
     const card = el("div", "hq-card hq-final");
-    M.final.message.split("\n").forEach((line) => card.appendChild(el("p", null, line)));
-    if (st.squad && st.squad.length) {
-      card.appendChild(el("p", "hq-squad-line", `Agents: ${squadNames(st.squad)} 🏅`));
-    }
     body.appendChild(card);
-    const combo = el("div", "hq-combo");
-    [...M.final.lockCode].forEach((d) => combo.appendChild(el("span", "hq-digit", d)));
+    const combo = el("div", "hq-combo hidden");
+    [...M.final.lockCode].forEach((d, i) => {
+      const digit = el("span", "hq-digit", d);
+      digit.style.animationDelay = `${i * 0.55}s`;
+      combo.appendChild(digit);
+    });
     body.appendChild(combo);
-    // 축하 색종이 (재렌더링 시 중복 생성 방지)
-    const stage = document.querySelector("#stage-mission");
-    if (!stage.querySelector(".hq-confetti")) {
-      const cv = el("canvas", "hq-confetti");
-      stage.appendChild(cv);
-      JiaFX.startConfetti(cv);
-    }
+    const squadLine = st.squad && st.squad.length
+      ? el("p", "hq-squad-line hidden", `Agents: ${squadNames(st.squad)} 🏅`)
+      : null;
+    if (squadLine) body.appendChild(squadLine);
+
+    typeLines(M.final.message.split("\n"), { container: card, cls: "type-par", charMs: 20, lineMs: 500 })
+      .then(() => {
+        // 자물쇠 숫자가 하나씩 공개되고, 다 공개되면 색종이
+        combo.classList.remove("hidden");
+        const totalMs = M.final.lockCode.length * 550 + 400;
+        setTimeout(() => {
+          if (squadLine) squadLine.classList.remove("hidden");
+          const stage = document.querySelector("#stage-mission");
+          if (!stage.querySelector(".hq-confetti")) {
+            const cv = el("canvas", "hq-confetti");
+            stage.appendChild(cv);
+            JiaFX.startConfetti(cv);
+          }
+        }, totalMs);
+      });
   }
 
   // ---------- 게임: 안개 미로 (조종자 교대 + 문스톤 수수께끼) ----------
@@ -768,7 +829,11 @@
     open() {
       body = document.querySelector("#mission-body");
       document.querySelectorAll(".stage").forEach((s) => s.classList.remove("active"));
-      document.querySelector("#stage-mission").classList.add("active");
+      const stage = document.querySelector("#stage-mission");
+      stage.classList.add("active");
+      // 입장 순간 화면이 지지직거리는 플리커 연출
+      stage.classList.add("hq-flicker");
+      setTimeout(() => stage.classList.remove("hq-flicker"), 950);
       document.querySelector("#progress").classList.add("hidden");
       window.scrollTo(0, 0);
       render(loadState());
