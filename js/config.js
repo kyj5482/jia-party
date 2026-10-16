@@ -1,5 +1,5 @@
 // ============================================================
-//  Jia The Best World Party — Settings
+//  Jia the Best, Party the Best! — Settings
 //  Edit this one file to change everything on the invitation.
 //  (이 파일만 수정하면 초대장의 모든 내용이 바뀝니다.)
 // ============================================================
@@ -7,7 +7,7 @@
 const PARTY_CONFIG = {
   // ---------- Basic info ----------
   childName: "Jia",
-  partyTitle: "Jia The Best World Party",
+  partyTitle: "Jia the Best, Party the Best!",
   partyDate: "Saturday, November 7, 2026",
   partyTime: "2:00 PM – 6:00 PM",
   partyPlace: "The location will be shared with confirmed guests 💌", // or put the address here
@@ -89,7 +89,7 @@ const PARTY_CONFIG = {
     "🗺️ A treasure hidden somewhere...?",
     "🔐 A secret behind a locked door...?",
     "Everything will be revealed",
-    "JIA\nTHE BEST WORLD PARTY",
+    "JIA THE BEST,\nPARTY THE BEST!",
     "And YOU are invited.",
   ],
   // Mystery hint cards shown after the teaser (front shows ??? to build curiosity)

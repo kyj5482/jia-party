@@ -126,7 +126,7 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   gap: 4px;
 }
 .intro-title .word {
-  font-size: clamp(2.4rem, 10vw, 5rem);
+  font-size: clamp(1.9rem, 8.5vw, 4.4rem);
   background: linear-gradient(135deg, #fbbf24, #f472b6, #8b5cf6, #38bdf8);
   background-size: 300% 300%;
   -webkit-background-clip: text;
@@ -136,8 +136,7 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   text-shadow: 0 0 40px rgba(244, 114, 182, 0.35);
 }
 .intro-title .w1 { animation-delay: 0.8s, 0s; }
-.intro-title .w2 { animation-delay: 1.3s, 0s; }
-.intro-title .w3 { animation-delay: 1.8s, 0s; }
+.intro-title .w2 { animation-delay: 1.4s, 0s; }
 
 @keyframes shimmer {
   0% { background-position: 0% 50%; }
@@ -153,9 +152,9 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   color: #cdd4ff;
   font-size: clamp(1rem, 3.5vw, 1.3rem);
   margin-bottom: 28px;
-  animation: fade-up 1s 2.4s ease both;
+  animation: fade-up 1s 2.1s ease both;
 }
-#btn-enter { animation: fade-up 1s 2.9s ease both, bounce 2s 4s ease-in-out infinite; }
+#btn-enter { animation: fade-up 1s 2.6s ease both, bounce 2s 3.7s ease-in-out infinite; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
@@ -164,7 +163,7 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   margin-top: 16px;
   color: #8f97c9;
   font-size: 0.85rem;
-  animation: fade-up 1s 3.5s ease both;
+  animation: fade-up 1s 3.2s ease both;
 }
 
 /* ---------- ② 사진 슬라이드 ---------- */
