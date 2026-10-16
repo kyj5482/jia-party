@@ -20,9 +20,9 @@
   function loadState() {
     try {
       const st = JSON.parse(localStorage.getItem(KEY)) || {};
-      return { screen: "pin", squad: [], turn: 0, ...st };
+      return { screen: "pin", squad: [], turn: 0, tokens: M.hintTokens, hintsUsed: {}, ...st };
     } catch (e) {
-      return { screen: "pin", squad: [], turn: 0 };
+      return { screen: "pin", squad: [], turn: 0, tokens: M.hintTokens, hintsUsed: {} };
     }
   }
   function saveState(st) { localStorage.setItem(KEY, JSON.stringify(st)); }
@@ -46,6 +46,69 @@
     b.appendChild(el("span", "agent-role", `${emoji} ${role}`));
     b.appendChild(el("strong", "agent-name", name));
     return b;
+  }
+
+  // 💡 힌트 바: 팀 공용 힌트 찬스로 미션별 힌트를 단계 공개
+  // 반환된 요소의 .mercy() 를 부르면 무료 힌트 1개 공개 (오답 자비용)
+  function hintBar(st, ms) {
+    const wrap = el("div", "hint-bar");
+    if (!ms.hints || !ms.hints.length) return wrap;
+    const tokensEl = el("p", "hint-tokens");
+    const list = el("div", "hint-list");
+    const btn = el("button", "hint-btn");
+    let armed = false, armTimer = null;
+
+    const usedCount = () => (st.hintsUsed && st.hintsUsed[st.idx]) || 0;
+
+    function redraw() {
+      const used = usedCount();
+      tokensEl.textContent =
+        `💡 HINT CHANCES  ${"●".repeat(st.tokens)}${"○".repeat(Math.max(0, M.hintTokens - st.tokens))}`;
+      list.innerHTML = "";
+      ms.hints.slice(0, used).forEach((h, i) => {
+        list.appendChild(el("p", "hint-revealed", `HINT ${i + 1} · ${h}`));
+      });
+      if (used >= ms.hints.length) { btn.classList.add("hidden"); return; }
+      btn.classList.remove("hidden");
+      btn.disabled = st.tokens <= 0;
+      btn.textContent = st.tokens <= 0
+        ? "No hint chances left 😅"
+        : armed ? "Spend 1 chance? Tap again to confirm 💡" : `Use a hint (${st.tokens} left)`;
+    }
+
+    function reveal(free) {
+      const used = usedCount();
+      if (used >= ms.hints.length) return;
+      if (!free) {
+        if (st.tokens <= 0) return;
+        st.tokens--;
+      }
+      st.hintsUsed = st.hintsUsed || {};
+      st.hintsUsed[st.idx] = used + 1;
+      saveState(st);
+      armed = false;
+      redraw();
+    }
+
+    btn.addEventListener("click", () => {
+      if (btn.disabled) return;
+      if (!armed) {
+        armed = true;
+        redraw();
+        clearTimeout(armTimer);
+        armTimer = setTimeout(() => { armed = false; redraw(); }, 3000);
+        return;
+      }
+      clearTimeout(armTimer);
+      reveal(false);
+    });
+
+    wrap.appendChild(tokensEl);
+    wrap.appendChild(list);
+    wrap.appendChild(btn);
+    redraw();
+    wrap.mercy = () => reveal(true);
+    return wrap;
   }
 
   function render(st) {
@@ -241,7 +304,7 @@
 
   // ---------- 미션: 안개 미로 (조종자 교대) ----------
   function renderMaze(st, ms) {
-    const SWITCH_EVERY = 8; // 이 걸음 수마다 조종자 교대
+    const SWITCH_EVERY = 12; // 이 걸음 수마다 조종자 교대 (대형 미로라 간격을 늘림)
     const grid = ms.maze.map((r) => [...r]);
     const H = grid.length, W = grid[0].length;
     let py, px;
@@ -252,6 +315,7 @@
 
     const badge = agentBadge("🧭", "DRIVER", agent(st, driverOff));
     body.appendChild(badge);
+    body.appendChild(hintBar(st, ms));
 
     const wrap = el("div", "maze-wrap");
     const cv = el("canvas", "maze-canvas");
@@ -259,7 +323,7 @@
     body.appendChild(wrap);
 
     const ctx = cv.getContext("2d");
-    const CELL = Math.min(26, Math.floor(Math.min(340, window.innerWidth - 70) / W));
+    const CELL = Math.min(26, Math.floor(Math.min(420, window.innerWidth - 60) / W));
     cv.width = W * CELL * devicePixelRatio;
     cv.height = H * CELL * devicePixelRatio;
     cv.style.width = W * CELL + "px";
@@ -356,6 +420,8 @@
       ms.body.split("\n").forEach((line) => card.appendChild(el("p", null, line || " ")));
       body.appendChild(card);
     }
+    const bar = hintBar(st, ms);
+    body.appendChild(bar);
     const input = el("input", "hq-input");
     input.placeholder = "YOUR ANSWER";
     input.autocapitalize = "characters";
@@ -363,10 +429,19 @@
     const err = el("p", "hq-error hidden", "Not quite — put your heads together and try again!");
     body.appendChild(err);
     const btn = el("button", "btn btn-hq", "SUBMIT ▶");
+    let wrongCount = 0;
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.answer)) {
         completeMission({ ...st, turn: st.turn + 1 });
       } else {
+        wrongCount++;
+        // HQ 자비: 오답 3번마다 무료 힌트 1개 공개
+        if (wrongCount % 3 === 0) {
+          bar.mercy();
+          err.textContent = "HQ took pity and sent a FREE hint — look up! 💝";
+        } else {
+          err.textContent = "Not quite — put your heads together and try again!";
+        }
         err.classList.remove("hidden");
         input.classList.add("shake");
         setTimeout(() => input.classList.remove("shake"), 450);
@@ -385,6 +460,7 @@
 
     const badge = agentBadge("🔆", "TAPPER", agent(st));
     body.appendChild(badge);
+    body.appendChild(hintBar(st, ms));
     const status = el("p", "simon-status", "Watch the fireflies... ✨");
     body.appendChild(status);
     const board = el("div", "simon-board");
@@ -422,18 +498,20 @@
     function tapper() { return agent(st, seq.length - 1); }
     function flash(pad) {
       pad.classList.add("lit");
-      setTimeout(() => pad.classList.remove("lit"), 320);
+      setTimeout(() => pad.classList.remove("lit"), 300);
     }
     function playSeq() {
       accepting = false;
       inputPos = 0;
       round.textContent = `Round ${seq.length} of ${ms.rounds}`;
       badge.querySelector(".agent-name").textContent = tapper();
-      seq.forEach((c, i) => setTimeout(() => flash(pads[c]), 600 + i * 550));
+      // 라운드가 올라갈수록 점점 빨라짐 (550ms → 최저 380ms)
+      const beat = Math.max(380, 550 - (seq.length - 1) * 30);
+      seq.forEach((c, i) => setTimeout(() => flash(pads[c]), 600 + i * beat));
       setTimeout(() => {
         accepting = true;
         status.textContent = `${tapper()} taps — everyone else, call out the colors!`;
-      }, 600 + seq.length * 550);
+      }, 600 + seq.length * beat);
     }
     function nextRound() {
       seq.push(Math.floor(Math.random() * 4));

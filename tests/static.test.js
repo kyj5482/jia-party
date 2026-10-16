@@ -65,6 +65,14 @@ test("HQ PIN은 3~8자리 숫자이다", () => {
   assert.match(MISSION.pin, /^\d{3,8}$/);
 });
 
+test("힌트 찬스: 토큰 수는 1~5이고 모든 미션에 힌트가 1개 이상 있다", () => {
+  assert.ok(MISSION.hintTokens >= 1 && MISSION.hintTokens <= 5, "hintTokens는 1~5");
+  MISSION.missions.forEach((m, i) => {
+    assert.ok(Array.isArray(m.hints) && m.hints.length >= 1, `미션 ${i + 1}: 힌트가 없음`);
+    m.hints.forEach((h) => assert.ok(h.length > 0, `미션 ${i + 1}: 빈 힌트`));
+  });
+});
+
 test("미션 체인: 마지막을 제외한 모든 미션에 clue/gateCode/gatePrompt가 있다", () => {
   const ms = MISSION.missions;
   assert.ok(ms.length >= 2, "미션은 2개 이상");
@@ -109,19 +117,21 @@ test("미로: 직사각형이고 S/K가 하나씩 있으며 BFS로 풀 수 있�
       if (c === "K") K = [y, x];
     }));
     const seen = new Set([S.join()]);
-    const q = [S];
-    let found = false;
+    const q = [[...S, 0]];
+    let found = -1;
     while (q.length) {
-      const [y, x] = q.shift();
-      if (y === K[0] && x === K[1]) { found = true; break; }
+      const [y, x, d] = q.shift();
+      if (y === K[0] && x === K[1]) { found = d; break; }
       for (const [dy, dx] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
         const ny = y + dy, nx = x + dx;
         if (maze[ny] && maze[ny][nx] !== "#" && !seen.has(`${ny},${nx}`)) {
           seen.add(`${ny},${nx}`);
-          q.push([ny, nx]);
+          q.push([ny, nx, d + 1]);
         }
       }
     }
-    assert.ok(found, "미로를 풀 수 없음 — S에서 K까지 길이 없습니다");
+    assert.ok(found > 0, "미로를 풀 수 없음 — S에서 K까지 길이 없습니다");
+    // 난이도 하한: 최단 경로가 너무 짧으면 시시해짐
+    assert.ok(found >= 30, `미로 최단 경로가 ${found}걸음 — 30걸음 이상으로 만드세요`);
   }
 });

@@ -3,9 +3,11 @@
 //
 //  ◆ 여는 방법(이스터에그): 초대장 첫 화면에서 손가락으로
 //    삼각형을 그리거나, 달(🌙)을 5번 연속 탭하면 HQ가 열립니다.
-//  ◆ 진행 순서: PIN 입력 → 브리핑 → 미션1(미로) → 봉투1 →
-//    미션2(암호 해독) → 봉투2 → 미션3(기억 게임) → 봉투3 →
+//  ◆ 진행 순서: PIN 입력 → 스쿼드 등록 → 브리핑 → 미션1(미로) →
+//    봉투1 → 미션2(암호 해독) → 봉투2 → 미션3(기억 게임) → 봉투3 →
 //    미션4(수수께끼 자물쇠) → 최종 보물 공개
+//  ◆ 힌트 찬스: 팀 전체에 hintTokens개. 미션마다 2단계 힌트가 있고
+//    1개씩 소모해 공개. 오답 3번이면 무료 힌트(HQ 자비)가 열립니다.
 //  ◆ 준비: MISSION_PLAN.md 의 시나리오/정답지/출력 카드 참고.
 //  ◆ 진행 초기화: 주소 뒤에 ?reset 을 붙여 열면 처음부터.
 // ============================================================
@@ -16,36 +18,49 @@ const MISSION_CONFIG = {
 
   teamName: "Agent Squad", // 브리핑에서 부르는 팀 이름
 
+  // 팀 전체가 함께 쓰는 힌트 찬스 수 (1~5 권장)
+  hintTokens: 3,
+
   briefing: [
     "Agents, welcome to JIA'S SECRET HQ. 🕵️",
     "Somewhere in this house is a locked treasure box.",
     "To open it, your team must clear 4 missions — together.",
     "Tablet missions are solved HERE. Whiteboard missions are solved on the board, then type your answer.",
-    "Stuck? Your team may call HQ (Jia's mom & dad) for ONE hint per mission.",
+    "Your squad shares 3 HINT CHANCES 💡 for the WHOLE night. Spend them wisely — the team must agree!",
     "Good luck, agents. The night is yours. 🌙",
   ],
 
   // ---------- 미션 목록 (순서대로 진행) ----------
   missions: [
     {
-      kind: "maze", // 태블릿 미션: 안개 속 미로 (다 같이 길을 기억하며 탈출)
+      kind: "maze", // 태블릿 미션: 안개 속 대형 미로 (조종자 8~12걸음마다 교대)
       title: "MISSION 1 · The Fog Maze",
       intro:
-        "The map is covered in fog — you can only see a few steps ahead. " +
-        "Work together: call out the turns, remember the dead ends, and guide the agent 🔦 to the key 🔑!",
+        "This maze is BIG and the fog is thick — you can only see a few steps ahead. " +
+        "Call out the turns, remember the dead ends, and guide the agent 🔦 to the key 🔑. " +
+        "Drivers switch automatically — every agent takes the wheel!",
       // S = 출발, K = 열쇠(도착), # = 벽, . = 길  (행 길이는 모두 같아야 함)
+      // 19×15, 최단 경로 96걸음 (생성기로 검증됨 — 수정 시 npm test로 확인!)
       maze: [
-        "#############",
-        "#S..#.......#",
-        "##.##.#####.#",
-        "#..#..#...#.#",
-        "#.##.##.#.#.#",
-        "#....#..#.#.#",
-        "#.####.##.#.#",
-        "#.#....#..#.#",
-        "#.#.####.##.#",
-        "#...#....#.K#",
-        "#############",
+        "###################",
+        "#S..#.....#.....#.#",
+        "###.#.###.#.###.#.#",
+        "#.#.#...#...#.#...#",
+        "#.#.###.#####.###.#",
+        "#.#.#...#...#.....#",
+        "#.#.#.###.#.###.###",
+        "#...#.....#...#...#",
+        "#.#########.#.###.#",
+        "#.#.......#.#.#.#.#",
+        "#.#.#####.#.#.#.#.#",
+        "#.#.#...#.#.#.#.#.#",
+        "#.#.#.#.#.###.#.#.#",
+        "#...#.#.......#..K#",
+        "###################",
+      ],
+      hints: [
+        "The key 🔑 waits near the BOTTOM-RIGHT corner of the map.",
+        "Lost? Put your hand on the LEFT wall and never let go — it will lead you there eventually!",
       ],
       // 미션 성공 시 보여줄 다음 봉투 힌트 (실제 숨길 장소로 수정하세요!)
       clue: "Nice work, agents! 🔑 Envelope #1 is hiding where the family watches movies... look UNDER the cushions!",
@@ -54,27 +69,38 @@ const MISSION_CONFIG = {
       gatePrompt: "Found Envelope #1? Type the secret word written inside:",
     },
     {
-      kind: "code", // 화이트보드 미션: 이모지 암호 해독
-      title: "MISSION 2 · The Emoji Cipher",
+      kind: "code", // 화이트보드 미션: 시저 암호 (한 칸 밀린 알파벳)
+      title: "MISSION 2 · The Shifted Message",
       intro:
-        "HQ intercepted a coded message! Copy it onto the whiteboard and crack it TOGETHER using the emoji key. " +
-        "Then type the secret word here.",
-      // 화면에 보여줄 문제 (출력 카드에도 동일하게 — MISSION_PLAN.md 참고)
+        "HQ intercepted a scrambled message. Something is wrong with the letters... " +
+        "they don't look like real words. Copy it onto the whiteboard and crack it TOGETHER, " +
+        "then type the decoded message here.",
+      // 정답 "MIDNIGHT SNACK"의 각 글자를 알파벳에서 +1 민 것
       body:
-        "KEY:  🌙=A   🎈=P   🦄=J   🍕=M   🌊=S\n\n" +
-        "MESSAGE:  🎈 🌙 🦄 🌙 🍕 🌙 🌊",
-      answer: "PAJAMAS", // 대소문자/공백 무시하고 비교
+        "INTERCEPTED MESSAGE:\n\n" +
+        "N J E O J H I U   T O B D L\n\n" +
+        "...the letters seem to have marched one step too far. 🥾",
+      answer: "MIDNIGHT SNACK", // 대소문자/공백 무시하고 비교
+      hints: [
+        "Every letter took ONE step forward in the alphabet. Push each one BACK: B→A, C→B, D→C...",
+        "The first word starts with M... and it happens when everyone should be asleep 🤫",
+      ],
       clue: "Decoded! 🧠 Envelope #2 is chilling with the ice cream... check the FREEZER door!",
       gateCode: "MOON",
       gatePrompt: "Found Envelope #2? Type the secret word written inside:",
     },
     {
-      kind: "simon", // 태블릿 미션: 반딧불 기억 게임 (시몬)
+      kind: "simon", // 태블릿 미션: 반딧불 기억 게임 (라운드마다 탭 담당 교대)
       title: "MISSION 3 · The Firefly Signal",
       intro:
-        "Four fireflies are flashing a secret signal 🧚. Watch the pattern, then repeat it by tapping. " +
-        "Each round adds one more flash — pass round 6 to win. Decide together before you tap!",
-      rounds: 6, // 통과해야 하는 라운드 수 (어리면 4~5로 낮추세요)
+        "Four fireflies are flashing a secret signal 🧚 — and it gets FAST. " +
+        "Watch the pattern, then the round's tapper repeats it. " +
+        "Each round adds one more flash — pass round 7 to win. Everyone else: chant the colors out loud!",
+      rounds: 7, // 통과해야 하는 라운드 수 (어리면 5~6으로 낮추세요)
+      hints: [
+        "Give each firefly a name — PURPLE, PINK, BLUE, GOLD — and chant the whole pattern together after every flash.",
+        "Split the job: each agent memorizes only the flashes in THEIR position (1st, 2nd, 3rd...). Then rebuild it together!",
+      ],
       clue: "Signal decoded! ✨ Envelope #3 went somewhere clean... look where the TOWELS live!",
       gateCode: "STAR",
       gatePrompt: "Found Envelope #3? Type the secret word written inside:",
@@ -84,24 +110,31 @@ const MISSION_CONFIG = {
       title: "MISSION 4 · The Three Riddles",
       intro:
         "The treasure box has a 3-digit lock. Each riddle gives ONE digit. " +
-        "Solve them on the whiteboard in order, then type the 3-digit code.",
+        "Solve them on the whiteboard in order, then type the 3-digit code. Think hard — this is the last door!",
       body:
-        "① How many sides does the SECRET SHAPE have?\n" +
-        "    (Hint: it's the shape that opened this HQ... 🔺)\n\n" +
-        "② I am an odd number. Take away one letter\n" +
-        "    and I become EVEN. What number am I?\n\n" +
-        "③ What is half of 18?",
-      answer: "379",
+        "① Multiply me by MYSELF and you get\n" +
+        "    the hours in two days, plus one.\n" +
+        "    What number am I?\n\n" +
+        "② Take the sides of a SQUARE, double them,\n" +
+        "    then subtract the corners of the\n" +
+        "    secret shape 🔺. What's left?\n\n" +
+        "③ Count the letters in MYSTERY,\n" +
+        "    then subtract the vowels in SLEEPOVER.",
+      answer: "753",
+      hints: [
+        "① Two days = 48 hours. 48 + 1 = 49. What × itself = 49?  ② A square has 4 sides...",
+        "③ MYSTERY has 7 letters. The vowels in SLEEPOVER are E, E, O, E. The code starts with 7!",
+      ],
       clue: "", // 마지막 미션은 clue 대신 아래 final 화면으로 이동
     },
   ],
 
   // ---------- 최종 화면 ----------
   final: {
-    lockCode: "379", // 실제 자물쇠를 이 번호로 맞춰 두세요!
+    lockCode: "753", // 실제 자물쇠를 이 번호로 맞춰 두세요!
     message:
       "MISSION COMPLETE, AGENTS! 🎉\n" +
-      "The lock code is 3 · 7 · 9.\n" +
+      "The lock code is 7 · 5 · 3.\n" +
       "The treasure box is waiting where Jia sleeps... 🛏️\n" +
       "Open it together — you earned it!",
   },
