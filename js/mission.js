@@ -237,9 +237,9 @@
     const ms = M.missions[st.idx];
     body.appendChild(el("p", "hq-progress", `MISSION ${st.idx + 1} / ${M.missions.length}`));
     body.appendChild(el("h3", "hq-mission-title", ms.title));
-    body.appendChild(el("p", "hq-progress",
+    body.appendChild(el("span", "type-chip",
       ms.kind === "code" ? "🖊️ WHITEBOARD MISSION" : "📱 TABLET MISSION"));
-    const card = el("div", "hq-card");
+    const card = el("div", "hq-card hq-intro");
     card.appendChild(el("p", null, ms.intro));
     body.appendChild(card);
     const btn = el("button", "btn btn-hq btn-big", "MISSION START! 🚀");
@@ -254,14 +254,22 @@
     top.appendChild(el("span", "game-title", ms.title));
     const quit = el("button", "game-quit", "✕");
     quit.setAttribute("aria-label", "Back to mission briefing");
-    quit.addEventListener("click", () => { screen.remove(); render(st); });
+    quit.addEventListener("click", () => {
+      if (screen._cleanup) screen._cleanup();
+      screen.remove();
+      render(st);
+    });
     top.appendChild(quit);
     screen.appendChild(top);
     const area = el("div", "game-area");
     screen.appendChild(area);
     document.body.appendChild(screen);
 
-    const onDone = (newSt) => { screen.remove(); completeMission(newSt); };
+    const onDone = (newSt) => {
+      if (screen._cleanup) screen._cleanup();
+      screen.remove();
+      completeMission(newSt);
+    };
     if (ms.kind === "maze") gameMaze(st, ms, area, screen, onDone);
     if (ms.kind === "code") gameCode(st, ms, area, onDone);
     if (ms.kind === "simon") gameSimon(st, ms, area, onDone);
@@ -327,28 +335,49 @@
     }
   }
 
-  // ---------- 게임: 안개 미로 (조종자 교대) ----------
+  // ---------- 게임: 안개 미로 (조종자 교대 + 문스톤 수수께끼) ----------
   function gameMaze(st, ms, area, screen, onDone) {
     const SWITCH_EVERY = 12; // 이 걸음 수마다 조종자 교대
     const grid = ms.maze.map((r) => [...r]);
     const H = grid.length, W = grid[0].length;
     let py, px;
-    grid.forEach((row, y) => row.forEach((c, x) => { if (c === "S") { py = y; px = x; } }));
+    const stoneCells = new Map(); // "y,x" → 수수께끼 인덱스 (G는 읽기 순서로 매칭)
+    grid.forEach((row, y) => row.forEach((c, x) => {
+      if (c === "S") { py = y; px = x; }
+      if (c === "G") stoneCells.set(`${y},${x}`, stoneCells.size);
+    }));
+    const stonesTotal = (ms.moonstones || []).length;
+    let stonesFound = 0;
     const visited = new Set([`${py},${px}`]);
     let moves = 0;
     let driverOff = 0; // 교대 횟수 (턴 로테이션 오프셋)
     let finished = false;
 
+    const statusRow = el("div", "maze-status");
     const badge = agentBadge("🧭", "DRIVER", agent(st, driverOff));
-    area.appendChild(badge);
+    statusRow.appendChild(badge);
+    const stonesEl = el("div", "stones-counter", `💎 ${stonesFound} / ${stonesTotal}`);
+    if (stonesTotal) statusRow.appendChild(stonesEl);
+    area.appendChild(statusRow);
 
     const wrap = el("div", "maze-wrap");
     const cv = el("canvas", "maze-canvas");
     wrap.appendChild(cv);
     area.appendChild(wrap);
+    const toast = el("p", "maze-toast hidden", "");
+    area.appendChild(toast);
+    let toastTimer = null;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add("hidden"), 2200);
+    }
 
     const ctx = cv.getContext("2d");
-    const CELL = Math.min(28, Math.floor(Math.min(480, window.innerWidth - 40) / W));
+    const wide = window.innerWidth >= 1100; // iMac 등 대화면이면 미로를 크게
+    const CELL = Math.min(wide ? 36 : 28,
+      Math.floor(Math.min(wide ? 680 : 480, window.innerWidth - 40) / W));
     cv.width = W * CELL * devicePixelRatio;
     cv.height = H * CELL * devicePixelRatio;
     cv.style.width = W * CELL + "px";
@@ -369,11 +398,11 @@
           const c = grid[y][x];
           ctx.fillStyle = c === "#" ? "#4c2a8f" : "#1c1440";
           ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
-          if (c === "K") {
+          if (c === "K" || c === "G") {
             ctx.font = `${CELL * 0.7}px serif`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText("🔑", x * CELL + CELL / 2, y * CELL + CELL / 2 + 1);
+            ctx.fillText(c === "K" ? "🔑" : "💎", x * CELL + CELL / 2, y * CELL + CELL / 2 + 1);
           }
         }
       }
@@ -424,8 +453,59 @@
       badge.querySelector(".agent-name").textContent = agent(st, driverOff);
     });
 
+    // 💎 문스톤 수수께끼 모달 (3지선다, 틀리면 그 보기만 비활성화)
+    const riddleOverlay = el("div", "pass-overlay hidden");
+    const riddleCard = el("div", "pass-card riddle-card");
+    riddleOverlay.appendChild(riddleCard);
+    screen.appendChild(riddleOverlay);
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showRiddle(idx, after) {
+      const r = ms.moonstones[idx];
+      riddleCard.innerHTML = "";
+      riddleCard.appendChild(el("div", "pass-emoji", "💎"));
+      riddleCard.appendChild(el("p", "riddle-label", "A MOONSTONE! Solve its riddle to collect it:"));
+      riddleCard.appendChild(el("p", "riddle-q", r.q));
+      const opts = el("div", "riddle-opts");
+      shuffle([...r.options]).forEach((opt) => {
+        const b = el("button", "btn btn-hq riddle-opt", opt);
+        b.addEventListener("click", () => {
+          if (norm(opt) === norm(r.answer)) {
+            stonesFound++;
+            stonesEl.textContent = `💎 ${stonesFound} / ${stonesTotal}`;
+            grid[py][px] = ".";
+            riddleOverlay.classList.add("hidden");
+            draw();
+            showToast(stonesFound === stonesTotal
+              ? "All moonstones collected! The key 🔑 is unsealed!"
+              : `Moonstone collected! ${stonesTotal - stonesFound} to go...`);
+            if (after) after();
+          } else {
+            b.disabled = true;
+            riddleCard.classList.add("shake");
+            setTimeout(() => riddleCard.classList.remove("shake"), 400);
+          }
+        });
+        opts.appendChild(b);
+      });
+      riddleCard.appendChild(opts);
+      riddleOverlay.classList.remove("hidden");
+    }
+
+    function overlayOpen() {
+      return !passOverlay.classList.contains("hidden") ||
+             !riddleOverlay.classList.contains("hidden");
+    }
+
     function move(dy, dx) {
-      if (finished || !passOverlay.classList.contains("hidden")) return;
+      if (finished || overlayOpen()) return;
       const ny = py + dy, nx = px + dx;
       if (grid[ny] === undefined || grid[ny][nx] === "#") {
         wrap.classList.add("shake");
@@ -436,13 +516,41 @@
       visited.add(`${py},${px}`);
       moves++;
       draw();
-      if (grid[py][px] === "K") {
+      const cell = grid[py][px];
+      if (cell === "G") {
+        // 수수께끼 먼저, 풀고 나서 필요하면 교대
+        showRiddle(stoneCells.get(`${py},${px}`), () => {
+          if (moves >= SWITCH_EVERY) switchDriver();
+        });
+        return;
+      }
+      if (cell === "K") {
+        if (stonesFound < stonesTotal) {
+          showToast(`The key is SEALED 🔒 — find all moonstones first! (💎 ${stonesFound}/${stonesTotal})`);
+          return;
+        }
         finished = true;
         setTimeout(() => onDone({ ...st, turn: st.turn + driverOff + 1 }), 450);
         return;
       }
       if (moves >= SWITCH_EVERY) switchDriver();
     }
+
+    // iMac 등 데스크톱: 키보드 화살표/WASD로도 조작
+    const KEYMAP = {
+      ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
+      w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1],
+    };
+    const onKey = (e) => {
+      const d = KEYMAP[e.key];
+      if (!d) return;
+      e.preventDefault();
+      move(d[0], d[1]);
+    };
+    document.addEventListener("keydown", onKey);
+    screen._cleanup = () => document.removeEventListener("keydown", onKey);
+    area.appendChild(el("p", "kbd-hint", "⌨️ Tip: arrow keys work too!"));
+
     draw();
   }
 

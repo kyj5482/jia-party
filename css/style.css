@@ -787,9 +787,21 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   padding: 20px 22px;
   width: 100%;
   text-align: left;
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 1.02rem;
 }
 .hq-card p { margin: 2px 0; }
+.hq-intro { border-left: 4px solid #fbbf24; color: #ded5ff; }
+
+.type-chip {
+  display: inline-block;
+  border: 1px solid rgba(56, 189, 248, 0.6);
+  color: #7dd3fc;
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+}
 .hq-puzzle { font-size: 1.08rem; white-space: pre-wrap; }
 .hq-clue { text-align: center; font-size: 1.1rem; border-color: #34d399; }
 .hq-final { text-align: center; font-size: 1.1rem; border-color: #fbbf24; }
@@ -872,8 +884,41 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 .pin-key:active { background: rgba(139, 92, 246, 0.4); }
 
 /* 미로 */
+.maze-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.stones-counter {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  color: #7dd3fc;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 1rem;
+}
 .maze-wrap { border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); }
 .maze-canvas { display: block; }
+.maze-toast {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-size: 0.95rem;
+  animation: fade-up 0.3s ease both;
+}
+.kbd-hint { display: none; color: #8b7fc0; font-size: 0.85rem; }
+
+/* 💎 문스톤 수수께끼 모달 */
+.riddle-card { max-width: 380px; }
+.riddle-label { color: #7dd3fc; font-size: 0.82rem; letter-spacing: 0.14em; }
+.riddle-q { color: #fff; font-size: 1.15rem; line-height: 1.5; }
+.riddle-opts { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.riddle-opt { width: 100%; }
+.riddle-opt:disabled { opacity: 0.35; cursor: default; text-decoration: line-through; }
 .dpad {
   display: grid;
   grid-template-areas: ". up ." "left down right";
@@ -926,4 +971,33 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   .simon-board { grid-template-columns: repeat(2, 104px); }
   .simon-pad { height: 104px; }
   .pin-pad { grid-template-columns: repeat(3, 68px); }
+  /* 모바일 가독성: 설명문을 조금 키우고 여백을 좁혀 화면 활용 */
+  .hq-card { padding: 16px 16px; font-size: 1rem; }
+  .mission-body { gap: 13px; }
+  .game-area { gap: 12px; }
+  .dpad-btn { width: 84px; height: 58px; }
+}
+
+/* iMac 등 대화면 최적화 */
+@media (min-width: 1100px) {
+  .mission-body, .game-area { max-width: 600px; }
+  .game-top { max-width: 640px; }
+  .game-title { font-size: 1.2rem; }
+  .hq-card { font-size: 1.12rem; padding: 26px 30px; }
+  .hq-text { font-size: 1.1rem; }
+  .hq-mission-title { font-size: 1.6rem; }
+  .photo-frame { max-width: 660px; }
+  .quiz-card { max-width: 620px; }
+  .quiz-question { font-size: 1.7rem; }
+  .rsvp-form { max-width: 540px; }
+  .done-card { max-width: 560px; }
+  .simon-board { grid-template-columns: repeat(2, 150px); gap: 18px; }
+  .simon-pad { height: 150px; }
+  .dpad-btn { width: 92px; height: 70px; font-size: 1.8rem; }
+  .pin-pad { grid-template-columns: repeat(3, 84px); }
+  .pin-key { height: 70px; }
+  .progress .step { font-size: 0.92rem; padding: 7px 16px; }
+  .riddle-card { max-width: 440px; }
+  .riddle-q { font-size: 1.3rem; }
+  .kbd-hint { display: block; } /* 키보드 팁은 데스크톱에서만 */
 }

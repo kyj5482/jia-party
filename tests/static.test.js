@@ -119,9 +119,10 @@ test("미로: 직사각형이고 S/K가 하나씩 있으며 BFS로 풀 수 있�
     const seen = new Set([S.join()]);
     const q = [[...S, 0]];
     let found = -1;
+    // 끝까지 탐색해야 문스톤 도달성 검사(seen)가 정확함 — K에서 조기 종료 금지
     while (q.length) {
       const [y, x, d] = q.shift();
-      if (y === K[0] && x === K[1]) { found = d; break; }
+      if (y === K[0] && x === K[1] && found < 0) found = d;
       for (const [dy, dx] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
         const ny = y + dy, nx = x + dx;
         if (maze[ny] && maze[ny][nx] !== "#" && !seen.has(`${ny},${nx}`)) {
@@ -133,5 +134,27 @@ test("미로: 직사각형이고 S/K가 하나씩 있으며 BFS로 풀 수 있�
     assert.ok(found > 0, "미로를 풀 수 없음 — S에서 K까지 길이 없습니다");
     // 난이도 하한: 최단 경로가 너무 짧으면 시시해짐
     assert.ok(found >= 30, `미로 최단 경로가 ${found}걸음 — 30걸음 이상으로 만드세요`);
+    // 문스톤(G)도 모두 도달 가능해야 함 (BFS seen에 포함)
+    maze.forEach((r, y) => [...r].forEach((c, x) => {
+      if (c === "G") assert.ok(seen.has(`${y},${x}`), `문스톤 (${y},${x})에 도달할 수 없음`);
+    }));
+  }
+});
+
+test("문스톤: G 개수와 수수께끼 수가 일치하고 보기에 정답이 포함된다", () => {
+  for (const m of MISSION.missions.filter((x) => x.kind === "maze")) {
+    const gCount = [...m.maze.join("")].filter((c) => c === "G").length;
+    const stones = m.moonstones || [];
+    assert.strictEqual(gCount, stones.length,
+      `미로의 G는 ${gCount}개인데 moonstones는 ${stones.length}개 — 개수를 맞추세요`);
+    stones.forEach((r, i) => {
+      assert.ok(r.q && r.q.length > 0, `문스톤 ${i + 1}: 질문 없음`);
+      assert.ok(Array.isArray(r.options) && r.options.length >= 2, `문스톤 ${i + 1}: 보기 2개 이상 필요`);
+      const normA = r.answer.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      assert.ok(
+        r.options.some((o) => o.toUpperCase().replace(/[^A-Z0-9]/g, "") === normA),
+        `문스톤 ${i + 1}: 보기 중에 정답(${r.answer})이 없음`
+      );
+    });
   }
 });

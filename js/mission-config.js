@@ -37,26 +37,45 @@ const MISSION_CONFIG = {
       title: "MISSION 1 · The Fog Maze",
       intro:
         "This maze is BIG and the fog is thick — you can only see a few steps ahead. " +
-        "Call out the turns, remember the dead ends, and guide the agent 🔦 to the key 🔑. " +
-        "Drivers switch automatically — every agent takes the wheel!",
-      // S = 출발, K = 열쇠(도착), # = 벽, . = 길  (행 길이는 모두 같아야 함)
+        "Three MOONSTONES 💎 are hidden in the maze, and the key 🔑 is SEALED until you collect them all. " +
+        "Each moonstone asks the squad a riddle! Call out the turns, remember the dead ends, " +
+        "and drivers switch automatically — every agent takes the wheel.",
+      // S = 출발, K = 열쇠(도착), G = 문스톤💎, # = 벽, . = 길
       // 19×15, 최단 경로 96걸음 (생성기로 검증됨 — 수정 시 npm test로 확인!)
       maze: [
         "###################",
         "#S..#.....#.....#.#",
         "###.#.###.#.###.#.#",
-        "#.#.#...#...#.#...#",
+        "#.#.#...#...#.#G..#",
         "#.#.###.#####.###.#",
         "#.#.#...#...#.....#",
         "#.#.#.###.#.###.###",
         "#...#.....#...#...#",
         "#.#########.#.###.#",
-        "#.#.......#.#.#.#.#",
+        "#.#..G....#.#.#.#.#",
         "#.#.#####.#.#.#.#.#",
-        "#.#.#...#.#.#.#.#.#",
+        "#.#.#..G#.#.#.#.#.#",
         "#.#.#.#.#.###.#.#.#",
         "#...#.#.......#..K#",
         "###################",
+      ],
+      // 문스톤 수수께끼 — 미로의 G 개수와 같아야 함 (3지선다, 틀려도 재도전)
+      moonstones: [
+        {
+          q: "I glow in the night sky and change my shape every single week. What am I?",
+          options: ["THE MOON", "A STAR", "A FIREFLY"],
+          answer: "THE MOON",
+        },
+        {
+          q: "What has a face and two hands, but no arms and no legs?",
+          options: ["A CLOCK", "A DOLL", "A PAINTING"],
+          answer: "A CLOCK",
+        },
+        {
+          q: "The more I dry, the wetter I get. What am I?",
+          options: ["A TOWEL", "A SPONGE", "AN UMBRELLA"],
+          answer: "A TOWEL",
+        },
       ],
       hints: [
         "The key 🔑 waits near the BOTTOM-RIGHT corner of the map.",
