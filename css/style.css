@@ -589,6 +589,7 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   color: #e9e4ff;
   justify-content: flex-start;
   padding-top: 36px;
+  padding-bottom: 96px; /* 좌하단 고정 'leave HQ' 버튼과 콘텐츠가 겹치지 않도록 예약 */
   position: relative;
 }
 .hq-header { text-align: center; margin-bottom: 22px; }
@@ -618,6 +619,63 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   gap: 16px;
 }
 .hq-text { color: #c9bfff; line-height: 1.55; text-align: center; }
+.hq-text-sub { color: #8b7fc0; font-size: 0.92rem; text-align: center; }
+.hq-squad-line { color: #a78bfa; margin-top: 10px; }
+
+/* 역할 배지: 지금 누구 차례인지 */
+.agent-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  border-radius: 999px;
+  padding: 7px 18px;
+}
+.agent-role { color: #fbbf24; font-size: 0.8rem; letter-spacing: 0.14em; }
+.agent-name { color: #fff; font-size: 1.1rem; }
+
+/* 스쿼드 등록 */
+.squad-row { display: flex; gap: 10px; width: 100%; justify-content: center; }
+.squad-input { flex: 1; min-width: 0; width: auto; }
+.squad-add { padding: 12px 20px; flex-shrink: 0; }
+.squad-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 36px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.6);
+  color: #e9e4ff;
+  border-radius: 999px;
+  padding: 5px 7px 5px 14px;
+}
+.chip-x {
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #e9e4ff;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* 미로 조종자 교대 카드 */
+.pass-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 2px dashed rgba(251, 191, 36, 0.6);
+  border-radius: 14px;
+  padding: 18px 22px;
+  text-align: center;
+  color: #fde68a;
+  font-size: 1.05rem;
+}
+.pass-emoji { font-size: 2rem; }
 .hq-progress { color: #8b7fc0; letter-spacing: 0.25em; font-size: 0.8rem; }
 .hq-mission-title { color: #fbbf24; font-size: 1.3rem; text-align: center; }
 
@@ -684,7 +742,8 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 }
 
 .hq-confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.hq-exit { position: absolute; bottom: 20px; left: 20px; }
+/* .btn-skip의 right:24px가 함께 적용되면 버튼이 좌우로 늘어나므로 right 해제 */
+.hq-exit { position: absolute; bottom: 20px; left: 20px; right: auto; }
 
 /* PIN 패드 */
 .pin-dots { display: flex; gap: 14px; }
