@@ -34,6 +34,7 @@
     const H = () => canvas.clientHeight;
 
     function launch(x) {
+      if (window.JiaSound) JiaSound.launch();
       rockets.push({
         x: x !== undefined ? x : rand(W() * 0.15, W() * 0.85),
         y: H(),
@@ -45,6 +46,7 @@
     }
 
     function explode(x, y, color) {
+      if (window.JiaSound) JiaSound.boom();
       const count = 60 + ((Math.random() * 40) | 0);
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + rand(-0.08, 0.08);

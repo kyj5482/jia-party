@@ -38,7 +38,7 @@
     if (name !== "intro" && fireworks) { fireworks.stop(); fireworks = null; }
     if (name === "intro" && !fireworks) fireworks = JiaFX.startFireworks($("#fireworks"));
     if (name === "teaser") playTeaser();
-    if (name === "done") JiaFX.startConfetti($("#confetti"));
+    if (name === "done") { JiaSound.fanfare(); JiaFX.startConfetti($("#confetti")); }
   }
 
   // 진행 단계 탭: 이미 도달했던 단계로 되돌아가면 그 단계의 처음부터 다시
@@ -61,6 +61,24 @@
         goToStage(step);
       }
     });
+  });
+
+  // ---------- 🔊 효과음 ----------
+  const sndBtn = $("#sound-toggle");
+  const syncSnd = () => { sndBtn.textContent = JiaSound.muted ? "🔇" : "🔊"; };
+  sndBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    JiaSound.toggleMute();
+    syncSnd();
+  });
+  syncSnd();
+  // 공통 버튼 탭음 (자체 효과음이 있는 버튼은 제외)
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.classList.contains("simon-pad") || b.classList.contains("pin-key") ||
+        b.classList.contains("dpad-btn") || b.id === "sound-toggle") return;
+    JiaSound.tap();
   });
 
   // ---------- ① 인트로 ----------
@@ -154,6 +172,7 @@
   function showSecret() {
     const overlay = $("#secret-overlay");
     if (!overlay.classList.contains("hidden")) return;
+    JiaSound.sparkle();
     overlay.classList.remove("hidden");
   }
   $("#btn-close-secret").addEventListener("click", () => {
@@ -294,6 +313,7 @@
       if (correct) quizScore++;
 
       document.querySelectorAll(".btn-ox").forEach((b) => (b.disabled = true));
+      if (correct) JiaSound.success(); else JiaSound.wrong();
       const result = $("#quiz-result");
       result.textContent = correct ? "🎉 Correct!" : "😅 Oops, not quite!";
       result.className = "quiz-result " + (correct ? "correct" : "wrong");

@@ -35,6 +35,22 @@ body {
 /* 모바일에서 버튼 연속 탭 시 더블탭 줌 방지 */
 button, .hint-card, .progress .step { touch-action: manipulation; }
 
+/* 🔊 효과음 토글 (항상 좌상단) */
+.sound-toggle {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 120;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: rgba(20, 12, 46, 0.55);
+  backdrop-filter: blur(4px);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
 /* ---------- 공통 ---------- */
 .stage {
   display: none;

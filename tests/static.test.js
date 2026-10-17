@@ -15,7 +15,7 @@ const PARTY = vm.runInNewContext(read("js/config.js") + ";PARTY_CONFIG", {});
 const MISSION = vm.runInNewContext(read("js/mission-config.js") + ";MISSION_CONFIG", {});
 
 test("모든 JS 파일이 문법 오류 없이 파싱된다", () => {
-  for (const f of ["js/config.js", "js/mission-config.js", "js/fireworks.js", "js/mission.js", "js/main.js"]) {
+  for (const f of ["js/config.js", "js/mission-config.js", "js/sound.js", "js/fireworks.js", "js/mission.js", "js/main.js"]) {
     execFileSync("node", ["--check", path.join(ROOT, f)]);
   }
 });

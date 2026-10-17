@@ -172,6 +172,7 @@
         if (finished) return;
         if (ci < chars.length) {
           cursor.before(document.createTextNode(chars[ci]));
+          if (ci % 2 === 0 && chars[ci] !== " ") JiaSound.type(); // 타닥타닥
           ci++;
           timer = setTimeout(tick, charMs);
         } else {
@@ -287,16 +288,19 @@
       const b = el("button", "pin-key", k);
       b.addEventListener("click", () => {
         if (locked) return;
+        JiaSound.key();
         if (k === "⌫") entered = entered.slice(0, -1);
         else if (k === "✓") {
           if (entered === M.pin) {
             // 접속 승인 연출: 점이 초록으로 바뀌고 승인 문구가 타이핑된 뒤 진행
             locked = true;
+            JiaSound.unlock();
             dotEls.forEach((d) => d.classList.add("ok"));
             typeLines(["> ACCESS CODE VERIFIED ✔  WELCOME, AGENTS."], { container: term })
               .then(() => setTimeout(() => render({ ...st, screen: "squad" }), 650));
             return;
           }
+          JiaSound.wrong();
           dots.classList.add("shake");
           setTimeout(() => dots.classList.remove("shake"), 450);
           entered = "";
@@ -543,8 +547,10 @@
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.gateCode)) {
         // 재동기화 성공 → 다음 방이 열린 HQ 맵으로 (봉투 구간은 턴 소모 없음)
+        JiaSound.unlock();
         render({ ...st, screen: "map", idx: st.idx + 1 });
       } else {
+        JiaSound.wrong();
         err.classList.remove("hidden");
         input.classList.add("shake");
         setTimeout(() => input.classList.remove("shake"), 450);
@@ -584,6 +590,7 @@
         const totalMs = M.final.lockCode.length * 550 + 400;
         setTimeout(() => {
           if (squadLine) squadLine.classList.remove("hidden");
+          JiaSound.fanfare();
           const stage = document.querySelector("#stage-mission");
           if (!stage.querySelector(".hq-confetti")) {
             const cv = el("canvas", "hq-confetti");
@@ -694,6 +701,7 @@
     screen.appendChild(passOverlay);
 
     function switchDriver() {
+      JiaSound.switch();
       driverOff++;
       moves = 0;
       passText.textContent = `SWITCH! Pass the tablet to ${agent(st, driverOff)} 👐`;
@@ -737,6 +745,7 @@
         const b = el("button", "btn btn-hq riddle-opt", opt);
         b.addEventListener("click", () => {
           if (norm(opt) === norm(r.answer)) {
+            JiaSound.sparkle();
             stonesFound++;
             stonesEl.textContent = `💎 ${stonesFound} / ${stonesTotal}`;
             grid[py][px] = ".";
@@ -747,6 +756,7 @@
               : `Moonstone collected! ${stonesTotal - stonesFound} to go...`);
             if (after) after();
           } else {
+            JiaSound.wrong();
             b.disabled = true;
             riddleCard.classList.add("shake");
             setTimeout(() => riddleCard.classList.remove("shake"), 400);
@@ -767,10 +777,12 @@
       if (finished || overlayOpen()) return;
       const ny = py + dy, nx = px + dx;
       if (grid[ny] === undefined || grid[ny][nx] === "#") {
+        JiaSound.bump();
         wrap.classList.add("shake");
         setTimeout(() => wrap.classList.remove("shake"), 300);
         return;
       }
+      JiaSound.step();
       py = ny; px = nx;
       visited.add(`${py},${px}`);
       moves++;
@@ -785,10 +797,12 @@
       }
       if (cell === "K") {
         if (stonesFound < stonesTotal) {
+          JiaSound.wrong();
           showToast(`The key is SEALED 🔒 — find all moonstones first! (💎 ${stonesFound}/${stonesTotal})`);
           return;
         }
         finished = true;
+        JiaSound.success();
         setTimeout(() => onDone({ ...st, turn: st.turn + driverOff + 1 }), 450);
         return;
       }
@@ -835,8 +849,10 @@
     let wrongCount = 0;
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.answer)) {
+        JiaSound.success();
         onDone({ ...st, turn: st.turn + 1 });
       } else {
+        JiaSound.wrong();
         wrongCount++;
         // HQ 자비: 오답 3번마다 무료 힌트 1개 공개
         if (wrongCount % 3 === 0) {
@@ -871,13 +887,14 @@
       p.style.setProperty("--pad-color", color);
       p.addEventListener("click", () => {
         if (!accepting) return;
-        flash(p);
+        flash(p, i);
         if (i === seq[inputPos]) {
           inputPos++;
           if (inputPos === seq.length) {
             accepting = false;
             if (seq.length >= ms.rounds) {
               status.textContent = "Signal decoded! 🎉";
+              JiaSound.success();
               setTimeout(() => onDone({ ...st, turn: st.turn + ms.rounds }), 800);
             } else {
               status.textContent = `Round ${seq.length} clear! Pass the tablet...`;
@@ -886,6 +903,7 @@
           }
         } else {
           accepting = false;
+          JiaSound.wrong();
           status.textContent = "Oops! Watch the same round again... 👀";
           setTimeout(() => playSeq(), 1300);
         }
@@ -899,7 +917,8 @@
     area.appendChild(hintBar(st, ms));
 
     function tapper() { return agent(st, seq.length - 1); }
-    function flash(pad) {
+    function flash(pad, idx) {
+      JiaSound.simon(idx); // 패드마다 고정 음계 — 소리로도 패턴을 외울 수 있음
       pad.classList.add("lit");
       setTimeout(() => pad.classList.remove("lit"), 300);
     }
@@ -910,7 +929,7 @@
       badge.querySelector(".agent-name").textContent = tapper();
       // 라운드가 올라갈수록 점점 빨라짐 (550ms → 최저 380ms)
       const beat = Math.max(380, 550 - (seq.length - 1) * 30);
-      seq.forEach((c, i) => setTimeout(() => flash(pads[c]), 600 + i * beat));
+      seq.forEach((c, i) => setTimeout(() => flash(pads[c], c), 600 + i * beat));
       setTimeout(() => {
         accepting = true;
         status.textContent = `${tapper()} taps — everyone else, call out the colors!`;

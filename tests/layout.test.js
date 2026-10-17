@@ -96,6 +96,8 @@ const ALLOWED_USES = [
     requireSelector: ".hq-exit", mustContain: "right: auto",
   },
   { cls: "hq-exit", container: "stage-mission" },
+  // 전역 효과음 토글 — 모든 화면 위 좌상단 고정 (컨테이너 밖, 최상위)
+  { cls: "sound-toggle", container: null },
 ];
 
 test("절대배치 클래스는 등록된 화면에서만, 보정 CSS와 함께 사용된다", () => {
