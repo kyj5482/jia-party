@@ -428,20 +428,24 @@
   function renderClue(st) {
     const ms = M.missions[st.idx];
     body.appendChild(el("div", "hq-stamp", "✔ MISSION CLEARED"));
+    // 봉투 찾기는 특정 요원이 아닌 스쿼드 전원의 활동
+    body.appendChild(agentBadge("🔍", "TEAM SEARCH", "ALL AGENTS"));
     const card = el("div", "hq-card hq-clue");
     body.appendChild(card);
     const btn = el("button", "btn btn-hq hidden", "We found the envelope! ▶");
     btn.addEventListener("click", () => render({ ...st, screen: "gate" }));
     body.appendChild(btn);
-    typeLines(["INCOMING TRANSMISSION FROM HQ...", ms.clue], { container: card, cls: "type-par", charMs: 18 })
-      .then(() => btn.classList.remove("hidden"));
+    typeLines(
+      ["INCOMING TRANSMISSION FROM HQ...", ms.clue, "EVERYONE — search together! 🏃‍♀️🏃"],
+      { container: card, cls: "type-par", charMs: 18 }
+    ).then(() => btn.classList.remove("hidden"));
   }
 
   // ---------- 봉투 코드 입력 → 다음 미션 ----------
   function renderGate(st) {
     const ms = M.missions[st.idx];
     body.appendChild(el("h3", "hq-mission-title", "🔒 SECURITY CHECK"));
-    body.appendChild(agentBadge("🔑", "UNLOCKER", agent(st)));
+    body.appendChild(agentBadge("🔑", "TEAM UNLOCK", "ALL AGENTS"));
     const promptBox = el("div", "hq-card gate-prompt");
     body.appendChild(promptBox);
     const ui = el("div", "pin-ui hidden");
@@ -455,7 +459,8 @@
     const btn = el("button", "btn btn-hq", "UNLOCK ▶");
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.gateCode)) {
-        render({ ...st, screen: "mission", idx: st.idx + 1, turn: st.turn + 1 });
+        // 봉투 구간은 전원 활동이라 턴을 소모하지 않음 (로테이션은 미션 안에서만)
+        render({ ...st, screen: "mission", idx: st.idx + 1 });
       } else {
         err.classList.remove("hidden");
         input.classList.add("shake");
@@ -464,7 +469,7 @@
     });
     ui.appendChild(btn);
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") btn.click(); });
-    typeLines([`${ms.gatePrompt}`, `(${agent(st)} types — the whole squad checks the spelling!)`],
+    typeLines([`${ms.gatePrompt}`, "(Any agent can type — the whole squad checks the spelling!)"],
       { container: promptBox, cls: "type-par", charMs: 16 })
       .then(() => ui.classList.remove("hidden"));
   }
