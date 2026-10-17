@@ -639,6 +639,104 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
 .agent-role { color: #fbbf24; font-size: 0.8rem; letter-spacing: 0.14em; }
 .agent-name { color: #fff; font-size: 1.1rem; }
 
+/* HUD: 방 진행 노드 + 힌트 토큰 */
+.hud {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 999px;
+  padding: 7px 16px;
+}
+.hud-path { display: flex; align-items: center; gap: 4px; }
+.hud-node { font-size: 1.05rem; filter: grayscale(1) brightness(0.5); transition: filter 0.3s; }
+.hud-node.done { filter: none; }
+.hud-node.cur { filter: none; animation: hud-pulse 1.4s ease-in-out infinite; }
+@keyframes hud-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+}
+.hud-link { color: #4c3f73; font-size: 0.8rem; }
+.hud-tokens { color: #fbbf24; font-size: 0.9rem; white-space: nowrap; }
+
+/* HQ 시스템 맵 */
+.map-list { width: 100%; display: flex; flex-direction: column; align-items: stretch; }
+.map-room {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+.map-room-icon { font-size: 1.9rem; width: 44px; text-align: center; }
+.map-room-info { flex: 1; text-align: left; }
+.map-room-name { color: #e9e4ff; font-size: 1rem; letter-spacing: 0.04em; }
+.map-room-state { color: #6b5e96; font-size: 0.8rem; letter-spacing: 0.14em; }
+.map-room-state.ok { color: #34d399; }
+.map-room.done { border-color: rgba(52, 211, 153, 0.5); }
+.map-room.done .map-room-icon { filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.6)); }
+.map-room.cur {
+  border-color: #fbbf24;
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.25);
+  animation: map-glow 2s ease-in-out infinite;
+}
+@keyframes map-glow {
+  0%, 100% { box-shadow: 0 0 14px rgba(251, 191, 36, 0.18); }
+  50% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.4); }
+}
+.map-room.locked { opacity: 0.55; }
+.map-room.locked .map-room-icon { filter: grayscale(1) brightness(0.6); }
+.map-room.vault { border-style: dashed; }
+.map-enter { padding: 10px 18px; font-size: 0.95rem; flex-shrink: 0; }
+.map-link {
+  width: 2px;
+  height: 16px;
+  margin: 2px auto;
+  background: repeating-linear-gradient(180deg, #4c3f73 0 4px, transparent 4px 8px);
+}
+
+/* 방 입장 헤더 */
+.room-head { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.room-icon { font-size: 3rem; animation: moon-float 4s ease-in-out infinite; }
+
+/* 필드 작전 레이더 (실세계로 나가는 연출) */
+.radar { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+.radar-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(56, 189, 248, 0.7);
+  border-radius: 50%;
+  animation: radar-pulse 2s ease-out infinite;
+}
+.radar-ring.r2 { animation-delay: 1s; }
+@keyframes radar-pulse {
+  from { transform: scale(0.3); opacity: 1; }
+  to   { transform: scale(1.15); opacity: 0; }
+}
+.radar-dot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+/* 금고 개방 */
+.vault-door {
+  font-size: 3.6rem;
+  animation: vault-shine 2.2s ease-in-out infinite;
+}
+@keyframes vault-shine {
+  0%, 100% { filter: drop-shadow(0 0 14px rgba(251, 191, 36, 0.5)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.95)); transform: scale(1.1); }
+}
+
 /* 터미널 부팅 시네마틱 */
 .boot-term {
   width: 100%;

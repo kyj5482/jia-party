@@ -113,6 +113,15 @@ test("미션 체인: 마지막을 제외한 모든 미션에 clue/gateCode/gateP
   assert.strictEqual(new Set(codes).size, codes.length, "봉투 코드가 중복됨");
 });
 
+test("세계관: world 설정과 모든 미션의 room 정보가 있다", () => {
+  const W = MISSION.world;
+  assert.ok(W && W.aiName && W.mapTitle && W.vault && W.vault.icon && W.vault.name, "world 설정 불완전");
+  assert.ok(Array.isArray(W.fieldOpLines) && W.fieldOpLines.length >= 1, "fieldOpLines 없음");
+  MISSION.missions.forEach((m, i) => {
+    assert.ok(m.room && m.room.icon && m.room.name, `미션 ${i + 1}: room(icon/name) 없음`);
+  });
+});
+
 test("미션 종류별 필수 필드: code→answer, simon→rounds, maze→maze", () => {
   MISSION.missions.forEach((m, i) => {
     if (m.kind === "code") assert.ok(m.answer && m.answer.length > 0, `미션 ${i + 1}: answer 없음`);

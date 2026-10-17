@@ -192,10 +192,76 @@
     if (st.screen === "pin") return renderPin(st);
     if (st.screen === "squad") return renderSquad(st);
     if (st.screen === "brief") return renderBrief(st);
+    if (st.screen === "map") return renderMap(st);
     if (st.screen === "mission") return renderMission(st);
     if (st.screen === "clue") return renderClue(st);
     if (st.screen === "gate") return renderGate(st);
     if (st.screen === "final") return renderFinal(st);
+  }
+
+  // ---------- HUD: 방 진행 노드 + 힌트 토큰 (공간 연속성) ----------
+  function hud(st) {
+    let done = 0, cur = -1;
+    if (st.screen === "map" || st.screen === "mission") { done = st.idx; cur = st.idx; }
+    else if (st.screen === "clue" || st.screen === "gate") { done = st.idx + 1; }
+    else if (st.screen === "final") { done = M.missions.length; }
+
+    const bar = el("div", "hud");
+    const path = el("div", "hud-path");
+    M.missions.forEach((m, i) => {
+      const node = el("span", "hud-node", m.room ? m.room.icon : "•");
+      if (i < done) node.classList.add("done");
+      else if (i === cur) node.classList.add("cur");
+      else node.classList.add("locked");
+      path.appendChild(node);
+      path.appendChild(el("span", "hud-link", "·"));
+    });
+    const vault = el("span", "hud-node vault", M.world.vault.icon);
+    if (st.screen === "final") vault.classList.add("done");
+    else vault.classList.add("locked");
+    path.appendChild(vault);
+    bar.appendChild(path);
+    bar.appendChild(el("span", "hud-tokens", `💡 ${st.tokens}`));
+    return bar;
+  }
+
+  // ---------- HQ 시스템 맵 (탐험 허브) ----------
+  function renderMap(st) {
+    body.appendChild(hud(st));
+    body.appendChild(el("h3", "hq-mission-title", `🗺️ ${M.world.mapTitle}`));
+    body.appendChild(el("p", "hq-text-sub", M.world.mapSub));
+
+    const map = el("div", "map-list");
+    M.missions.forEach((m, i) => {
+      const node = el("div", "map-room");
+      node.appendChild(el("div", "map-room-icon", i <= st.idx ? m.room.icon : "❓"));
+      const info = el("div", "map-room-info");
+      info.appendChild(el("p", "map-room-name", i <= st.idx ? m.room.name : "??? — SIGNAL LOST"));
+      node.appendChild(info);
+      if (i < st.idx) {
+        node.classList.add("done");
+        info.appendChild(el("p", "map-room-state ok", "RESTORED ✔"));
+      } else if (i === st.idx) {
+        node.classList.add("cur");
+        const enter = el("button", "btn btn-hq map-enter", m.room.enterLabel || "ENTER ▶");
+        enter.addEventListener("click", () => render({ ...st, screen: "mission" }));
+        node.appendChild(enter);
+      } else {
+        node.classList.add("locked");
+        info.appendChild(el("p", "map-room-state", "DARK 🔒"));
+      }
+      map.appendChild(node);
+      map.appendChild(el("div", "map-link"));
+    });
+    // 금고 노드 (모든 방 복구 후 자동 개방)
+    const vault = el("div", "map-room vault locked");
+    vault.appendChild(el("div", "map-room-icon", M.world.vault.icon));
+    const vinfo = el("div", "map-room-info");
+    vinfo.appendChild(el("p", "map-room-name", M.world.vault.name));
+    vinfo.appendChild(el("p", "map-room-state", "SEALED 🔒"));
+    vault.appendChild(vinfo);
+    map.appendChild(vault);
+    body.appendChild(map);
   }
 
   // ---------- PIN 입장 (시네마틱) ----------
@@ -366,8 +432,8 @@
   function renderBrief(st) {
     const box = el("div", "boot-term");
     body.appendChild(box);
-    const btn = el("button", "btn btn-hq hidden", "ACCEPT MISSION ▶");
-    btn.addEventListener("click", () => render({ ...st, screen: "mission", idx: 0 }));
+    const btn = el("button", "btn btn-hq hidden", "OPEN HQ MAP 🗺️");
+    btn.addEventListener("click", () => render({ ...st, screen: "map", idx: 0 }));
     body.appendChild(btn);
     const lines = [...M.briefing, `YOUR SQUAD: ${squadNames(st.squad)} 🤝`];
     typeLines(lines, { container: box, charMs: 22, lineMs: 420 })
@@ -383,10 +449,14 @@
   // 미션 브리핑 화면: 정보를 읽고 MISSION START! 를 눌러야 게임 시작
   function renderMission(st) {
     const ms = M.missions[st.idx];
-    body.appendChild(el("p", "hq-progress", `MISSION ${st.idx + 1} / ${M.missions.length}`));
-    body.appendChild(el("h3", "hq-mission-title", ms.title));
-    body.appendChild(el("span", "type-chip",
+    body.appendChild(hud(st));
+    const head = el("div", "room-head");
+    head.appendChild(el("div", "room-icon", ms.room.icon));
+    head.appendChild(el("h3", "hq-mission-title", ms.room.name));
+    head.appendChild(el("p", "hq-progress", ms.title));
+    head.appendChild(el("span", "type-chip",
       ms.kind === "code" ? "🖊️ WHITEBOARD MISSION" : "📱 TABLET MISSION"));
+    body.appendChild(head);
     const card = el("div", "hq-card hq-intro");
     body.appendChild(card);
     const btn = el("button", "btn btn-hq btn-big hidden", "MISSION START! 🚀");
@@ -427,7 +497,15 @@
   // ---------- 성공 → 봉투 힌트 ----------
   function renderClue(st) {
     const ms = M.missions[st.idx];
-    body.appendChild(el("div", "hq-stamp", "✔ MISSION CLEARED"));
+    body.appendChild(hud(st));
+    body.appendChild(el("div", "hq-stamp", `✔ ${ms.room.name} RESTORED`));
+    body.appendChild(el("h3", "hq-mission-title", "📡 FIELD OPERATION — REAL WORLD"));
+    // 레이더 펄스: 디지털 세계에서 실세계로 나가는 연출
+    const radar = el("div", "radar");
+    radar.appendChild(el("span", "radar-ring"));
+    radar.appendChild(el("span", "radar-ring r2"));
+    radar.appendChild(el("span", "radar-dot", "📍"));
+    body.appendChild(radar);
     // 봉투 찾기는 특정 요원이 아닌 스쿼드 전원의 활동
     body.appendChild(agentBadge("🔍", "TEAM SEARCH", "ALL AGENTS"));
     const card = el("div", "hq-card hq-clue");
@@ -435,16 +513,21 @@
     const btn = el("button", "btn btn-hq hidden", "We found the envelope! ▶");
     btn.addEventListener("click", () => render({ ...st, screen: "gate" }));
     body.appendChild(btn);
-    typeLines(
-      ["INCOMING TRANSMISSION FROM HQ...", ms.clue, "EVERYONE — search together! 🏃‍♀️🏃"],
-      { container: card, cls: "type-par", charMs: 18 }
-    ).then(() => btn.classList.remove("hidden"));
+    const lines = [
+      ...(ms.clearLine ? [ms.clearLine] : []),
+      ...M.world.fieldOpLines,
+      ms.clue,
+      M.world.fieldOpGo,
+    ];
+    typeLines(lines, { container: card, cls: "type-par", charMs: 18 })
+      .then(() => btn.classList.remove("hidden"));
   }
 
   // ---------- 봉투 코드 입력 → 다음 미션 ----------
   function renderGate(st) {
     const ms = M.missions[st.idx];
-    body.appendChild(el("h3", "hq-mission-title", "🔒 SECURITY CHECK"));
+    body.appendChild(hud(st));
+    body.appendChild(el("h3", "hq-mission-title", "📶 RE-SYNC WITH HQ"));
     body.appendChild(agentBadge("🔑", "TEAM UNLOCK", "ALL AGENTS"));
     const promptBox = el("div", "hq-card gate-prompt");
     body.appendChild(promptBox);
@@ -459,8 +542,8 @@
     const btn = el("button", "btn btn-hq", "UNLOCK ▶");
     btn.addEventListener("click", () => {
       if (norm(input.value) === norm(ms.gateCode)) {
-        // 봉투 구간은 전원 활동이라 턴을 소모하지 않음 (로테이션은 미션 안에서만)
-        render({ ...st, screen: "mission", idx: st.idx + 1 });
+        // 재동기화 성공 → 다음 방이 열린 HQ 맵으로 (봉투 구간은 턴 소모 없음)
+        render({ ...st, screen: "map", idx: st.idx + 1 });
       } else {
         err.classList.remove("hidden");
         input.classList.add("shake");
@@ -476,7 +559,10 @@
 
   // ---------- 최종 (시네마틱 피날레) ----------
   function renderFinal(st) {
-    body.appendChild(el("div", "hq-stamp hq-stamp-final", "★ ALL MISSIONS CLEARED ★"));
+    body.appendChild(hud(st));
+    const vaultIcon = el("div", "vault-door", M.world.vault.icon);
+    body.appendChild(vaultIcon);
+    body.appendChild(el("div", "hq-stamp hq-stamp-final", `★ ${M.world.vault.name} UNSEALED ★`));
     const card = el("div", "hq-card hq-final");
     body.appendChild(card);
     const combo = el("div", "hq-combo hidden");
