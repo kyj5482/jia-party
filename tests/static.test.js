@@ -65,6 +65,25 @@ test("HQ PIN은 3~8자리 숫자이다", () => {
   assert.match(MISSION.pin, /^\d{3,8}$/);
 });
 
+test("타이프라이터: 그래핌 단위 분할로 이모지가 깨지지 않는다", () => {
+  // mission.js가 그래핌 분할(Intl.Segmenter)을 쓰는지 — line[ci] 식의
+  // 코드 유닛 인덱싱은 이모지를 반쪽으로 잘라 ㅁ로 표시되게 함
+  const js = read("js/mission.js");
+  assert.ok(js.includes("Intl.Segmenter"), "mission.js에 그래핌 분할이 없음");
+  assert.ok(!/lines?\[li\]\[ci\]|line\[ci\]/.test(js), "코드 유닛 단위 인덱싱이 남아 있음");
+  // 분할-재조립 왕복 검증: 설정의 이모지 포함 문구가 원형 그대로 복원되는지
+  const seg = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+  const samples = [
+    ...MISSION.recruit.bootLines,
+    ...MISSION.missions.flatMap((m) => [m.intro, m.clue || ""]),
+    "💎 moonstone 🧜‍♀️ mermaid 🦄 unicorn ⚡",
+  ];
+  for (const s of samples) {
+    const rebuilt = [...seg.segment(s)].map((x) => x.segment).join("");
+    assert.strictEqual(rebuilt, s, `그래핌 왕복 불일치: ${s}`);
+  }
+});
+
 test("요원 모집: 부팅 문구/아바타/칭호가 올바르다", () => {
   const R = MISSION.recruit;
   assert.ok(R, "recruit 설정이 없음");

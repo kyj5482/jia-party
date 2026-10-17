@@ -122,6 +122,15 @@
   // 글자가 한 자씩 타이핑되고, 화면을 탭하면 즉시 완성(fast-forward).
   // 반환된 promise가 끝난 뒤 버튼류를 보여주는 패턴으로 사용.
   let cancelTyping = null;
+  // 이모지(서로게이트 쌍/ZWJ 조합)를 반쪽으로 자르면 깨진 문자가 보이므로
+  // 화면에 보이는 글자(그래핌) 단위로 분할해서 타이핑한다
+  const segmenter = typeof Intl !== "undefined" && Intl.Segmenter
+    ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
+    : null;
+  function graphemes(line) {
+    if (segmenter) return [...segmenter.segment(line)].map((s) => s.segment);
+    return [...line]; // 폴백: 코드포인트 단위 (서로게이트 쌍까지는 안전)
+  }
   function typeLines(lines, { container, cls = "boot-line", charMs = 24, lineMs = 380 } = {}) {
     let finished = false;
     let timer = null;
@@ -152,7 +161,7 @@
     function nextLine() {
       if (finished) return;
       if (li >= lines.length) return finish();
-      const line = lines[li];
+      const chars = graphemes(lines[li]);
       const p = el("p", cls, "");
       const cursor = el("span", "boot-cursor", "▋");
       p.appendChild(cursor);
@@ -161,8 +170,8 @@
       let ci = 0;
       (function tick() {
         if (finished) return;
-        if (ci < line.length) {
-          cursor.before(document.createTextNode(line[ci]));
+        if (ci < chars.length) {
+          cursor.before(document.createTextNode(chars[ci]));
           ci++;
           timer = setTimeout(tick, charMs);
         } else {
