@@ -86,17 +86,31 @@ test("시몬 라운드는 4~8이다 (성취 가능한 도전)", () => {
 });
 
 // ---------- 피치덱 (지아 설득용) ----------
-test("피치덱: 선택 카드 3세트와 승인 버튼이 있다", () => {
+test("피치덱: 의사결정 3세트(트레이드오프 포함)와 승인 버튼이 있다", () => {
   const pitch = read("pitch/index.html");
   const pickSlides = (pitch.match(/data-pick="/g) || []).length;
-  assert.strictEqual(pickSlides, 3, "선택 슬라이드가 3개가 아님");
-  assert.ok((pitch.match(/class="pick"/g) || []).length >= 6, "선택 카드가 부족함");
+  assert.strictEqual(pickSlides, 3, "의사결정 슬라이드가 3개가 아님");
+  const pros = (pitch.match(/class="pro"/g) || []).length;
+  const cons = (pitch.match(/class="con"/g) || []).length;
+  assert.ok(pros >= 9 && cons >= 9, "모든 선택지에 장점/고려(트레이드오프)가 있어야 함");
   assert.ok(pitch.includes('id="btn-go"'), "GO 승인 버튼 없음");
   assert.ok(pitch.includes("APPROVED BY JIA"), "승인 도장 없음");
 });
 
-test("피치덱: 부모 안심/포용 슬라이드가 있다 (플래너 벤치마크)", () => {
+test("피치덱: 플래너 교육 요소가 모두 포함되어 있다 (벤치마크)", () => {
   const pitch = read("pitch/index.html");
-  assert.ok(pitch.includes("PARENTS WILL SAY YES"), "부모 안심 슬라이드 없음");
-  assert.ok(pitch.includes("NO ONE LEFT OUT"), "포용 슬라이드 없음");
+  const required = [
+    "THE BRIEF",            // 세 가지 질문 프레임
+    "Peak-End",             // 피크엔드 법칙
+    "RUN OF SHOW",          // 3막 런 오브 쇼
+    "ANTICIPATION",         // 기대감 설계
+    "SAFETY",               // 안전 = 신뢰
+    "INCLUSION",            // 포용 설계
+    "RISK PLAN",            // 리스크 대비
+    "TIMELINE",             // 실행 타임라인
+    "SIGN-OFF",             // 디렉터 승인
+  ];
+  for (const marker of required) {
+    assert.ok(pitch.includes(marker), `피치덱에 '${marker}' 섹션이 없음`);
+  }
 });
