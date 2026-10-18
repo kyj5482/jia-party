@@ -107,10 +107,24 @@ test("피치덱: 플래너 교육 요소가 모두 포함되어 있다 (벤치�
     "SAFETY",               // 안전 = 신뢰
     "INCLUSION",            // 포용 설계
     "RISK PLAN",            // 리스크 대비
+    "YOUR MOMENTS",         // 아이가 리드하는 3장면 + 대본 (능동 학습)
     "TIMELINE",             // 실행 타임라인
+    "YOUR PLAYBOOK",        // 전이 가능한 기술 요약
+    "AFTER PARTY",          // 회고 (성장 루프)
     "SIGN-OFF",             // 디렉터 승인
   ];
   for (const marker of required) {
     assert.ok(pitch.includes(marker), `피치덱에 '${marker}' 섹션이 없음`);
+  }
+});
+
+test("피치덱: 추상 개념에 6학년용 비유/정의가 붙어 있다 (교육 접근성)", () => {
+  const pitch = read("pitch/index.html");
+  // 피크엔드 → 놀이공원 비유, 트레이드오프 → 한 줄 정의
+  assert.ok(pitch.includes("놀이공원"), "피크엔드 법칙에 아이 눈높이 비유가 없음");
+  assert.ok(pitch.includes("하나를 얻으면 하나를 내주는"), "트레이드오프 정의가 없음");
+  // 회고 3질문 (KEEP/FIX/TRY)
+  for (const k of ["KEEP", "FIX", "TRY"]) {
+    assert.ok(pitch.includes(k), `회고 슬라이드에 ${k} 질문이 없음`);
   }
 });
