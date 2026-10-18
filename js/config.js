@@ -14,6 +14,12 @@ const PARTY_CONFIG = {
   partyPlace: "The location will be shared with confirmed guests 💌", // or put the address here
   rsvpDeadline: "Please RSVP by October 31!",
 
+  // ---------- 부모 안내 (미국 파티 관행: 안전·연락·픽업 명시) ----------
+  hostContact: "", // 질문 받을 연락처. 예: "Jia's mom · (555) 123-4567" — 비우면 표시 안 함
+  poolSupervision: "Adults will be at the pool at ALL times 🛟 — non-swimmers welcome, there's plenty of dry-land fun too!",
+  partyOnlyPickup: "Party-only guests: pickup at 8:30 PM 🚗",
+  bedtimeNote: "Lights out around 10:30 PM · breakfast before Sunday 10 AM pickup 🥞",
+
   // Set to true for a pool party → the pool packing list
   // appears automatically on the final screen.
   isPoolParty: true,

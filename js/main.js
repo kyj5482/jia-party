@@ -475,6 +475,8 @@
       `Phone: ${data.parentPhone}\n` +
       `Attending: ${data.attend}\n` +
       `Sleepover: ${data.sleepover || "Not sure yet"}\n` +
+      `Swimming: ${data.swim || "Not answered"}\n` +
+      `Photos: ${data.photos || "Not answered"}\n` +
       `Notes: ${data.notes || "None"}`
     );
   }
@@ -504,6 +506,15 @@
         fill("#pool-checklist", C.poolChecklist);
       }
       fill("#sleep-checklist", C.sleepoverChecklist);
+
+      // 부모 안내: 안전·픽업·취침·연락처 (미국 파티 관행)
+      $("#parent-note").classList.remove("hidden");
+      $("#note-supervision").textContent = `🛟 ${C.poolSupervision}`;
+      $("#note-pickup").textContent = `🚗 ${C.partyOnlyPickup}`;
+      $("#note-bedtime").textContent = `🌙 ${C.bedtimeNote}`;
+      const contact = $("#note-contact");
+      if (C.hostContact) contact.textContent = `💬 Questions? ${C.hostContact}`;
+      else contact.classList.add("hidden");
     }
 
     rsvpDone = true; // 완료 후 단계 이동 잠금

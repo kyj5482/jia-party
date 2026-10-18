@@ -125,6 +125,17 @@
         <label class="radio"><input type="radio" name="sleepover" value="Sleeping over" /> Yes — sleeping over! 🌙</label>
         <label class="radio"><input type="radio" name="sleepover" value="Party only" /> Party only — evening pickup 🚗</label>
       </fieldset>
+      <fieldset>
+        <legend>Swimming comfort 💦</legend>
+        <label class="radio"><input type="radio" name="swim" value="Confident swimmer" /> Confident swimmer 🐬</label>
+        <label class="radio"><input type="radio" name="swim" value="Still learning" /> Still learning — shallow end please 🛟</label>
+        <label class="radio"><input type="radio" name="swim" value="Prefers dry land" /> Prefers dry land 🏖️</label>
+      </fieldset>
+      <fieldset>
+        <legend>Group photos 📸</legend>
+        <label class="radio"><input type="radio" name="photos" value="OK to share" /> Okay to share with party families</label>
+        <label class="radio"><input type="radio" name="photos" value="Please do not share" /> Please don't share my child's photos</label>
+      </fieldset>
       <label>
         <span class="label-title">Allergies / notes</span>
         <textarea name="notes" rows="3" placeholder="e.g. Peanut allergy / Needs to leave at 5 PM"></textarea>
@@ -155,6 +166,13 @@
           <h4>🌙 For the night...</h4>
           <ul id="sleep-checklist"></ul>
         </div>
+      </div>
+      <div class="parent-note hidden" id="parent-note">
+        <h3>👨‍👩‍👧 For parents</h3>
+        <p id="note-supervision"></p>
+        <p id="note-pickup"></p>
+        <p id="note-bedtime"></p>
+        <p id="note-contact"></p>
       </div>
       <div class="manual-send hidden" id="manual-send">
         <p>Please send your RSVP to Jia's parents using a button below!</p>

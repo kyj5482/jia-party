@@ -550,6 +550,19 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   box-shadow: 0 2px 6px rgba(109, 40, 217, 0.12);
 }
 
+.parent-note {
+  width: 100%;
+  background: #f6f1ff;
+  border-radius: 14px;
+  padding: 16px 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.parent-note h3 { color: var(--purple-deep); font-size: 1.05rem; }
+.parent-note p { font-size: 0.95rem; color: #5b4a73; line-height: 1.5; }
+
 .manual-send { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .copy-done { color: #059669; font-size: 0.95rem; }
 
