@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>지아에게만 공개하는 비밀 기획서 🤫</title>
+  <title>JIA ONLY 🤫 파티 기획 피치</title>
   <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,74 +18,120 @@
       height: 100dvh;
       overflow: hidden;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .deck { height: 100dvh; position: relative; }
     .slide {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 48px 28px 92px;
-      gap: 18px;
+      padding: 40px 24px 96px;
+      gap: 20px;
       overflow-y: auto;
     }
     .slide.on { display: flex; animation: in 0.45s ease both; }
-    @keyframes in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; } }
+    @keyframes in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; } }
 
-    .kicker { color: #fbbf24; letter-spacing: 0.3em; font-size: 0.8rem; font-family: "Fredoka"; }
+    .kicker { color: #fbbf24; letter-spacing: 0.34em; font-size: 0.78rem; font-family: "Fredoka"; }
     h1 {
-      font-size: clamp(1.9rem, 7vw, 3.2rem);
-      line-height: 1.25;
+      font-size: clamp(2.2rem, 9vw, 4rem); line-height: 1.2;
       background: linear-gradient(135deg, #fbbf24, #f472b6, #8b5cf6);
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    h2 { font-size: clamp(1.5rem, 5.5vw, 2.2rem); color: #fff; line-height: 1.3; }
-    p, li { font-size: clamp(1.05rem, 3.6vw, 1.3rem); line-height: 1.6; color: #cfc6f5; }
-    .big { font-size: clamp(1.2rem, 4.5vw, 1.6rem); color: #fff; }
-    .emoji-lg { font-size: 3.2rem; }
+    h2 { font-size: clamp(1.7rem, 6.5vw, 2.6rem); color: #fff; line-height: 1.3; }
+    .sub { font-size: clamp(1.1rem, 4vw, 1.4rem); color: #b9aee6; }
+    .emoji-xl { font-size: clamp(4rem, 16vw, 6.5rem); line-height: 1; }
 
-    .card {
+    /* 인용 말풍선 */
+    .quote {
+      font-size: clamp(1.8rem, 7vw, 2.8rem); color: #fff; line-height: 1.4;
+      background: rgba(255,255,255,0.07);
+      border-radius: 24px; padding: 26px 34px;
+      position: relative; max-width: 540px;
+    }
+    .quote::after { content: ""; position: absolute; bottom: -14px; left: 56px;
+      border: 14px solid transparent; border-top-color: rgba(255,255,255,0.07); border-bottom: 0; }
+
+    /* 감정 곡선 */
+    .curve { width: min(560px, 94vw); }
+    .curve svg { width: 100%; height: auto; overflow: visible; }
+    .curve-label { font-size: 0.95rem; fill: #b9aee6; font-family: "Gaegu"; }
+    .curve-emoji { font-size: 22px; }
+
+    /* WOW 3 */
+    .wow3 { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: 640px; }
+    .wow {
+      flex: 1 1 150px; max-width: 190px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(139,92,246,0.45);
-      border-radius: 18px;
-      padding: 18px 22px;
-      max-width: 560px;
-      width: 100%;
-      text-align: left;
+      border-radius: 20px; padding: 22px 14px;
+      display: flex; flex-direction: column; gap: 10px; align-items: center;
     }
-    .card li { margin: 6px 0 6px 2px; list-style: none; }
-    .gold { color: #fbbf24; }
-    .pink { color: #f9a8d4; }
-    .mint { color: #6ee7b7; }
-    .secret {
-      border-color: rgba(248,113,113,0.6);
-      background: rgba(248,113,113,0.08);
+    .wow .ic { font-size: 2.8rem; }
+    .wow p { font-size: 1.05rem; color: #e4dcff; line-height: 1.4; }
+    .wow b { color: #fbbf24; }
+
+    /* 무드보드 */
+    .mood { display: grid; grid-template-columns: repeat(3, minmax(88px, 120px)); gap: 10px; }
+    .tile {
+      aspect-ratio: 1; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem;
     }
-    .flow { display: flex; flex-direction: column; gap: 8px; max-width: 560px; width: 100%; }
-    .flow-step {
+
+    /* 선택 카드 */
+    .picks { display: flex; flex-direction: column; gap: 12px; width: min(520px, 100%); }
+    .pick {
       display: flex; align-items: center; gap: 14px; text-align: left;
       background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(139,92,246,0.4);
-      border-radius: 14px; padding: 10px 16px;
+      border: 2px solid rgba(139,92,246,0.4);
+      border-radius: 18px; padding: 14px 18px;
+      cursor: pointer; transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+      font-family: inherit; color: #efeaff; width: 100%;
     }
-    .flow-step .ic { font-size: 1.7rem; width: 40px; text-align: center; flex-shrink: 0; }
-    .q {
-      display: flex; align-items: flex-start; gap: 10px; text-align: left;
+    .pick:active { transform: scale(0.98); }
+    .pick .ic { font-size: 2rem; flex-shrink: 0; }
+    .pick .tt { font-size: 1.2rem; color: #fff; }
+    .pick .dd { font-size: 0.98rem; color: #a89cd8; }
+    .pick.picked {
+      border-color: #fbbf24;
+      box-shadow: 0 0 22px rgba(251,191,36,0.35);
       background: rgba(251,191,36,0.1);
-      border: 1px dashed rgba(251,191,36,0.6);
-      border-radius: 14px; padding: 10px 16px; max-width: 560px; width: 100%;
     }
-    .q b { color: #fde68a; }
+    .pick.picked::after { content: "✔"; margin-left: auto; color: #fbbf24; font-size: 1.4rem; }
+
+    /* 최종 */
+    .summary {
+      background: rgba(255,255,255,0.06);
+      border: 1px dashed rgba(251,191,36,0.6);
+      border-radius: 18px; padding: 14px 22px;
+      font-size: 1.1rem; color: #fde68a; text-align: left;
+      min-width: min(440px, 90vw);
+    }
+    .summary p { margin: 4px 0; }
+    .stamp-zone { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .stamp-btn {
+      font-family: inherit; font-size: 1.3rem; cursor: pointer;
+      border-radius: 16px; padding: 16px 30px; border: none; color: #fff;
+    }
+    .go { background: linear-gradient(135deg, #10b981, #38bdf8); }
+    .think { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); }
+    .approved {
+      display: none; font-size: 1.9rem; color: #6ee7b7;
+      transform: rotate(-4deg); border: 3px solid #6ee7b7; border-radius: 10px;
+      padding: 6px 20px; font-family: "Fredoka"; letter-spacing: 0.1em;
+      animation: stamp 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+    }
+    @keyframes stamp { from { opacity: 0; transform: rotate(-4deg) scale(2.4); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
 
     .nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       display: flex; align-items: center; justify-content: space-between;
       padding: 14px 18px calc(14px + env(safe-area-inset-bottom));
-      background: linear-gradient(0deg, rgba(5,3,20,0.9), transparent);
-      z-index: 10;
+      background: linear-gradient(0deg, rgba(5,3,20,0.92), transparent); z-index: 10;
     }
     .nav button {
       font-family: inherit; font-size: 1.05rem;
@@ -95,140 +141,143 @@
     }
     .nav button:disabled { opacity: 0.3; }
     .count { color: #8f85b8; font-family: "Fredoka"; font-size: 0.9rem; letter-spacing: 0.15em; }
-    .hint-swipe { position: fixed; top: 12px; right: 16px; color: #6b5e96; font-size: 0.8rem; z-index: 10; }
-
-    .stamp-zone { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
-    .stamp-btn {
-      font-family: inherit; font-size: 1.3rem; cursor: pointer;
-      border-radius: 16px; padding: 16px 30px; border: none; color: #fff;
-    }
-    .go { background: linear-gradient(135deg, #10b981, #38bdf8); }
-    .think { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3) !important; }
-    .approved {
-      display: none; margin-top: 10px; font-size: 2rem; color: #6ee7b7;
-      transform: rotate(-4deg); border: 3px solid #6ee7b7; border-radius: 10px;
-      padding: 6px 20px; font-family: "Fredoka"; letter-spacing: 0.1em;
-      animation: stamp 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
-    }
-    @keyframes stamp { from { opacity: 0; transform: rotate(-4deg) scale(2.4); } to { opacity: 1; transform: rotate(-4deg) scale(1); } }
   </style>
 </head>
 <body>
-  <div class="hint-swipe">← 스와이프 / 방향키 →</div>
-  <div class="deck" id="deck">
+  <div class="deck">
 
-    <!-- 1. 타이틀 -->
+    <!-- 1. 커버 -->
     <section class="slide on">
-      <p class="kicker">TOP SECRET · FOR JIA ONLY</p>
-      <div class="emoji-lg">🤫</div>
-      <h1>지아에게만 공개하는<br/>비밀 기획서</h1>
-      <p class="big">네 생일 파티, 이렇게 만들어보면 어때?</p>
-      <p>아빠가 몰래 준비하던 걸 지금부터 보여줄게.<br/>마지막에 네 결정이 필요해!</p>
+      <p class="kicker">FOR JIA ONLY · TOP SECRET</p>
+      <div class="emoji-xl">🌙</div>
+      <h1>JIA'S MYSTERY<br/>SLEEPOVER</h1>
+      <p class="sub">11월 7일 토요일 · 너의 첫 슬립오버</p>
     </section>
 
-    <!-- 2. 콘셉트 -->
+    <!-- 2. 목표 한 문장 -->
     <section class="slide">
-      <p class="kicker">THE THEME</p>
-      <h2>🌙 Jia's Mystery Sleepover</h2>
-      <p class="big">"a splash · a secret · a sleepover"</p>
-      <div class="card">
-        <li>💦 낮에는 <b class="gold">풀 파티</b></li>
-        <li>🌙 밤에는 네 인생 <b class="gold">첫 슬립오버</b></li>
-        <li>🕵️ 그리고 그 사이에... <b class="pink">아무도 모르는 비밀 게임</b></li>
+      <p class="kicker">OUR MISSION</p>
+      <p class="sub">월요일에 학교에서, 친구들이 이렇게 말하게 만들기:</p>
+      <div class="quote">"지아네 파티...<br/>역대급이었어." 🤯</div>
+    </section>
+
+    <!-- 3. 친구들의 하루 (감정 곡선) -->
+    <section class="slide">
+      <p class="kicker">GUEST JOURNEY</p>
+      <h2>친구들의 기분 곡선</h2>
+      <div class="curve">
+        <svg viewBox="0 0 560 240">
+          <polyline points="30,150 120,120 230,140 330,60 440,30 530,90"
+            fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#38bdf8"/><stop offset="0.6" stop-color="#f472b6"/><stop offset="1" stop-color="#fbbf24"/>
+          </linearGradient></defs>
+          <text x="30" y="140" text-anchor="middle" class="curve-emoji">💌</text>
+          <text x="30" y="180" text-anchor="middle" class="curve-label">초대장</text>
+          <text x="120" y="110" text-anchor="middle" class="curve-emoji">💦</text>
+          <text x="120" y="150" text-anchor="middle" class="curve-label">풀파티</text>
+          <text x="230" y="130" text-anchor="middle" class="curve-emoji">🤫</text>
+          <text x="230" y="170" text-anchor="middle" class="curve-label">...비밀?</text>
+          <text x="330" y="50" text-anchor="middle" class="curve-emoji">🕵️</text>
+          <text x="330" y="92" text-anchor="middle" class="curve-label">미션!</text>
+          <text x="440" y="20" text-anchor="middle" class="curve-emoji">💎</text>
+          <text x="440" y="62" text-anchor="middle" class="curve-label">보물!!</text>
+          <text x="530" y="80" text-anchor="middle" class="curve-emoji">🌙</text>
+          <text x="530" y="122" text-anchor="middle" class="curve-label">꿀잠</text>
+        </svg>
       </div>
-      <p>친구들은 파티에 오는 줄만 알지,<br/><b class="mint">게임 속 요원이 될 거라는 건 모르지.</b></p>
+      <p class="sub">지루할 틈이 없는 하루 🎢</p>
     </section>
 
-    <!-- 3. 초대장 -->
+    <!-- 4. 세 가지 WOW -->
     <section class="slide">
-      <p class="kicker">STEP 1 · THE INVITATION</p>
-      <h2>📨 초대장부터 게임이야</h2>
-      <div class="flow">
-        <div class="flow-step"><span class="ic">🎆</span><p>밤하늘 불꽃놀이로 시작하는 웹 초대장</p></div>
-        <div class="flow-step"><span class="ic">📸</span><p>너를 소개하는 사진 코너</p></div>
-        <div class="flow-step"><span class="ic">⭕❌</span><p>"지아를 얼마나 알아?" O/X 퀴즈 — 통과해야 다음으로!</p></div>
-        <div class="flow-step"><span class="ic">🎬</span><p>"어떤 파티일까...?" 영화 예고편 티저</p></div>
-        <div class="flow-step"><span class="ic">📝</span><p>참가 신청 (부모님 연락처 + 슬립오버 여부)</p></div>
-      </div>
-      <div class="q"><p>💬 <b>너에게 물어볼 것:</b> 어떤 사진 넣을래? 퀴즈 문제(네가 좋아하는 것들) 네가 직접 정할래?</p></div>
-    </section>
-
-    <!-- 4. 파티 당일 -->
-    <section class="slide">
-      <p class="kicker">STEP 2 · PARTY DAY</p>
-      <h2>🗓️ 11월 7일 토요일, 이렇게 흘러가</h2>
-      <div class="flow">
-        <div class="flow-step"><span class="ic">🏊</span><p>오후 2시 — 풀 파티! 실컷 물놀이</p></div>
-        <div class="flow-step"><span class="ic">🍕</span><p>저녁 먹고 한숨 돌리면...</p></div>
-        <div class="flow-step"><span class="ic">🔺</span><p><b class="pink">빅 리빌</b> — "사실 초대장엔 비밀이 숨어 있었어!"</p></div>
-        <div class="flow-step"><span class="ic">🕵️</span><p>약 1시간 반의 <b class="gold">비밀 미션 게임</b></p></div>
-        <div class="flow-step"><span class="ic">🎁</span><p>자물쇠 보물상자 개봉 + 시상식</p></div>
-        <div class="flow-step"><span class="ic">🌙</span><p>영화 보다가 다같이 잠들기 → 일요일 아침 해산</p></div>
-      </div>
-    </section>
-
-    <!-- 5. 게임 세계관 -->
-    <section class="slide">
-      <p class="kicker">STEP 3 · THE SECRET GAME</p>
-      <h2>🛰️ SECRET HQ에 어서 와</h2>
-      <div class="card">
-        <li>초대장 첫 화면에 <b class="gold">숨겨진 동작</b>을 하면 비밀 본부(HQ)가 열려</li>
-        <li>본부의 AI <b class="pink">NOVA</b>가 말을 걸어: <i>"누군가 내 시스템을 뒤섞고 보물 금고를 봉인했어..."</i></li>
-        <li>친구들은 각자 <b class="mint">캐릭터(🦄🐱🧜‍♀️...)를 골라 요원</b>이 되고</li>
-        <li>어둠에 잠긴 <b class="gold">4개의 방</b>을 하나씩 복구해야 해:<br/>🌫️ 지하 터널 → 📡 코드 연구소 → 🧚 반딧불 정원 → 🧠 수수께끼 금고</li>
-        <li>단서는 <b class="pink">태블릿 속</b>에도, <b class="pink">우리 집 곳곳(진짜 세계!)</b>에도 숨어 있어</li>
-        <li>마지막엔 <b class="gold">진짜 자물쇠가 걸린 진짜 보물상자</b> 💎</li>
+      <p class="kicker">3 WOW MOMENTS</p>
+      <h2>친구들이 소리 지를 순간</h2>
+      <div class="wow3">
+        <div class="wow"><span class="ic">💌</span><p><b>초대장부터 게임</b><br/>퀴즈를 풀어야 올 수 있어</p></div>
+        <div class="wow"><span class="ic">🔺</span><p><b>빅 리빌</b><br/>"초대장에 비밀이 있었어!"</p></div>
+        <div class="wow"><span class="ic">💎</span><p><b>진짜 보물상자</b><br/>진짜 자물쇠, 진짜 선물</p></div>
       </div>
     </section>
 
-    <!-- 6. 지아의 역할 -->
+    <!-- 5. 왜 좋아할까 (플래너의 근거) -->
     <section class="slide">
-      <p class="kicker">YOUR ROLE</p>
-      <h2>🎬 너는 이 게임의 공동 감독</h2>
-      <div class="card">
-        <li>🖼️ 초대장 사진 & O/X 퀴즈 내용 — <b class="gold">네가 결정</b></li>
-        <li>🦄 요원 캐릭터와 칭호 아이디어 — <b class="gold">네가 추가 가능</b></li>
-        <li>🎁 보물상자에 뭘 넣을지 — <b class="gold">같이 결정</b></li>
-        <li>🏆 마지막 시상식 상 이름 짓기 — <b class="gold">네 담당</b></li>
-        <li>🕵️ 당일엔 네가 친구들을 이끄는 <b class="pink">리드 요원</b></li>
-      </div>
-      <div class="card secret">
-        <li>🤐 단, <b>미션 문제의 정답</b>과 <b>단서를 숨긴 장소</b>는 아빠만 아는 비밀!</li>
-        <li>→ 그래야 <b class="gold">너도 친구들이랑 똑같이 게임을 즐길 수 있으니까</b> 😉</li>
+      <p class="kicker">WHY IT WORKS</p>
+      <h2>친구들이 빠져드는 이유</h2>
+      <div class="wow3">
+        <div class="wow"><span class="ic">🦄</span><p><b>내 캐릭터</b><br/>각자 요원이 되니까</p></div>
+        <div class="wow"><span class="ic">🤝</span><p><b>다같이</b><br/>혼자선 못 풀어, 팀이니까</p></div>
+        <div class="wow"><span class="ic">🏠</span><p><b>집 전체가 게임판</b><br/>화면 밖으로 뛰어다니니까</p></div>
       </div>
     </section>
 
-    <!-- 7. 결정할 것들 -->
+    <!-- 6. 무드보드 -->
     <section class="slide">
-      <p class="kicker">YOUR CALL</p>
-      <h2>🙋 지아의 결정이 필요해!</h2>
-      <div class="q"><p><b>Q1.</b> 테마 이름 <b class="gold">"Jia's Mystery Sleepover"</b> — 마음에 들어? 바꾸고 싶은 이름 있어?</p></div>
-      <div class="q"><p><b>Q2.</b> 몇 명을 초대하고 싶어? 누구누구?</p></div>
-      <div class="q"><p><b>Q3.</b> O/X 퀴즈에 들어갈 "지아에 대한 사실" 5개 — 뭘로 할까?</p></div>
-      <div class="q"><p><b>Q4.</b> 보물상자 선물로 뭐가 좋을까?</p></div>
-      <div class="q"><p><b>Q5.</b> 게임이 좀 어려운 게 좋아, 쉬운 게 좋아? (힌트 찬스는 3개야)</p></div>
+      <p class="kicker">MOODBOARD</p>
+      <h2>파티의 색과 기분</h2>
+      <div class="mood">
+        <div class="tile" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">💜</div>
+        <div class="tile" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9)">💦</div>
+        <div class="tile" style="background:linear-gradient(135deg,#0b1026,#1a1446)">🌙</div>
+        <div class="tile" style="background:linear-gradient(135deg,#f472b6,#db2777)">🦄</div>
+        <div class="tile" style="background:linear-gradient(135deg,#fbbf24,#d97706)">💎</div>
+        <div class="tile" style="background:linear-gradient(135deg,#111827,#047857)">🕵️</div>
+      </div>
     </section>
 
-    <!-- 8. 승인 -->
+    <!-- 7. 선택 1: 퀴즈 -->
+    <section class="slide" data-pick="quiz">
+      <p class="kicker">YOUR CALL · 1 / 3</p>
+      <h2>초대장 퀴즈,<br/>너의 어떤 걸 낼까?</h2>
+      <div class="picks">
+        <button class="pick" data-val="좋아하는 것들 💜"><span class="ic">💜</span><span><span class="tt">A. 좋아하는 것들</span><br/><span class="dd">색깔, 동물, 음식, 꿈</span></span></button>
+        <button class="pick" data-val="추억 이야기 📸"><span class="ic">📸</span><span><span class="tt">B. 추억 이야기</span><br/><span class="dd">웃긴 사건, 여행, 어릴 때</span></span></button>
+        <button class="pick" data-val="반반 믹스 🎲"><span class="ic">🎲</span><span><span class="tt">C. 반반 믹스</span><br/><span class="dd">둘 다 섞어서</span></span></button>
+      </div>
+    </section>
+
+    <!-- 8. 선택 2: 보물상자 -->
+    <section class="slide" data-pick="treasure">
+      <p class="kicker">YOUR CALL · 2 / 3</p>
+      <h2>보물상자엔<br/>뭘 넣을까? 💎</h2>
+      <div class="picks">
+        <button class="pick" data-val="글로우 파티킷 🌟"><span class="ic">🌟</span><span><span class="tt">A. 글로우 파티킷</span><br/><span class="dd">야광팔찌 + 폴라로이드 + 간식</span></span></button>
+        <button class="pick" data-val="만들기 키트 🎨"><span class="ic">🎨</span><span><span class="tt">B. 만들기 키트</span><br/><span class="dd">슬라임/팔찌 만들기 세트</span></span></button>
+        <button class="pick" data-val="깜짝 믹스 🎁"><span class="ic">🎁</span><span><span class="tt">C. 깜짝 믹스</span><br/><span class="dd">아빠가 비밀로 조합 (너도 서프라이즈!)</span></span></button>
+      </div>
+    </section>
+
+    <!-- 9. 선택 3: 난이도 -->
+    <section class="slide" data-pick="level">
+      <p class="kicker">YOUR CALL · 3 / 3</p>
+      <h2>게임 난이도는?</h2>
+      <p class="sub">힌트 찬스 💡 3개는 기본으로 줄게</p>
+      <div class="picks">
+        <button class="pick" data-val="술술 풀리게 🍦"><span class="ic">🍦</span><span><span class="tt">A. 술술 풀리게</span><br/><span class="dd">신나게 진행되는 게 최고</span></span></button>
+        <button class="pick" data-val="적당한 도전 🔥"><span class="ic">🔥</span><span><span class="tt">B. 적당한 도전</span><br/><span class="dd">머리 좀 쓰다가 "아하!"</span></span></button>
+        <button class="pick" data-val="하드코어 🧠"><span class="ic">🧠</span><span><span class="tt">C. 하드코어</span><br/><span class="dd">우리 다 천재니까</span></span></button>
+      </div>
+    </section>
+
+    <!-- 10. GO -->
     <section class="slide">
       <p class="kicker">FINAL DECISION</p>
-      <div class="emoji-lg">💜</div>
-      <h2>이렇게 진행해도 될까?</h2>
-      <p>네가 OK 하면, 아빠는 바로 비밀 작전을 시작할게.<br/>고치고 싶은 게 있으면 뭐든 말해줘 — 네 파티니까!</p>
+      <h2>이대로 GO 할까? 💜</h2>
+      <div class="summary" id="summary"><p>👈 앞 장에서 고르면 여기 정리돼!</p></div>
       <div class="stamp-zone">
-        <button class="stamp-btn go" id="btn-go">좋아, GO! 🚀</button>
-        <button class="stamp-btn think" id="btn-think">조금 바꾸고 싶어 🤔</button>
+        <button class="stamp-btn go" id="btn-go">GO! 🚀</button>
+        <button class="stamp-btn think" id="btn-think">바꾸고 싶은 게 있어 🤔</button>
       </div>
       <div class="approved" id="approved">APPROVED BY JIA ✔</div>
-      <p id="think-msg" style="display:none;" class="pink">좋아! 어떤 부분을 바꾸고 싶은지 아빠한테 말해줘 ✍️</p>
+      <p class="sub" id="think-msg" style="display:none;">좋아! 뭘 바꿀지 아빠한테 말해줘 ✍️</p>
     </section>
 
   </div>
 
   <div class="nav">
-    <button id="prev">← 이전</button>
+    <button id="prev">←</button>
     <span class="count" id="count"></span>
-    <button id="next">다음 →</button>
+    <button id="next">→</button>
   </div>
 
   <script>
@@ -237,6 +286,31 @@
     const prev = document.getElementById("prev");
     const next = document.getElementById("next");
     const count = document.getElementById("count");
+    const picks = JSON.parse(localStorage.getItem("jia_pitch_picks") || "{}");
+
+    const LABELS = { quiz: "퀴즈", treasure: "보물상자", level: "난이도" };
+    function syncPicks() {
+      document.querySelectorAll(".slide[data-pick]").forEach((s) => {
+        const key = s.dataset.pick;
+        s.querySelectorAll(".pick").forEach((b) =>
+          b.classList.toggle("picked", picks[key] === b.dataset.val));
+      });
+      const sum = document.getElementById("summary");
+      const rows = Object.keys(LABELS)
+        .filter((k) => picks[k])
+        .map((k) => `<p>✔ ${LABELS[k]}: <b>${picks[k]}</b></p>`);
+      sum.innerHTML = rows.length ? rows.join("") : "<p>👈 앞 장에서 고르면 여기 정리돼!</p>";
+    }
+    document.querySelectorAll(".slide[data-pick] .pick").forEach((b) => {
+      b.addEventListener("click", () => {
+        const key = b.closest(".slide").dataset.pick;
+        picks[key] = b.dataset.val;
+        localStorage.setItem("jia_pitch_picks", JSON.stringify(picks));
+        syncPicks();
+        setTimeout(() => show(cur + 1), 450); // 고르면 자동으로 다음 장
+      });
+    });
+
     function show(i) {
       cur = Math.max(0, Math.min(slides.length - 1, i));
       slides.forEach((s, si) => s.classList.toggle("on", si === cur));
@@ -253,6 +327,7 @@
     let sx = 0, sy = 0;
     document.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
     document.addEventListener("touchend", (e) => {
+      if (e.target.closest("button")) return;
       const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) show(cur + (dx < 0 ? 1 : -1));
     }, { passive: true });
@@ -264,6 +339,7 @@
       document.getElementById("think-msg").style.display = "block";
       document.getElementById("approved").style.display = "none";
     });
+    syncPicks();
     show(0);
   </script>
 </body>
