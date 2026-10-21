@@ -1,5 +1,10 @@
 # 🌙 Jia's Mystery Sleepover — 초대장 + 파티 미션 웹사이트
 
+> **⚠️ 현재 공개 페이지는 v2(심플 버전)입니다.**
+> - **v2 (현재 `index.html`)** — Jia's Birthday Party 심플 초대장: 인트로(날짜·드롭오프·픽업·준비물) → O/X 퀴즈 "Let's see if you know Jia!" (5문항 중 3개 이상) → RSVP. 설정: `js/config-v2.js`, 로직: `js/main-v2.js`
+>   - 일정: 11/14(토) 오후 4시 Blue Lake Swimming Pool 드롭오프 → 11/15(일) 오전 10:30 픽업 (14 Thunder Trail, Irvine) · 준비물: 수영복·잠옷
+> - **v1 (`v1.html`)** — 아래에 설명된 미스터리 슬립오버 풀버전 (사진·티저·Secret HQ 포함). https://kyj5482.github.io/jia-party/v1.html 로 접근 가능
+
 딸 지아의 첫 슬립오버 생일 파티 초대장입니다. GitHub Pages로 배포되는 정적 사이트이며,
 친구들이 아래 순서(관문)를 통과해야 파티 참가 신청을 할 수 있습니다.
 미국 친구들을 초대하는 용도라 **사이트의 모든 문구는 영어**입니다.

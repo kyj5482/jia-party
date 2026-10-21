@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jia's Mystery Sleepover 🌙</title>
-  <meta name="description" content="You're invited to Jia's Mystery Sleepover — pass the challenges, pack your pajamas, and join the adventure." />
+  <title>Jia's Birthday Party 🎉</title>
+  <meta name="description" content="You're invited to Jia's Birthday Party — take the quiz and RSVP!" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Patrick+Hand&display=swap" rel="stylesheet" />
@@ -18,49 +18,35 @@
 
   <!-- Progress steps -->
   <nav id="progress" class="progress hidden" aria-label="Progress">
-    <span class="step" data-step="photos">📸 Meet Jia</span>
     <span class="step" data-step="quiz">⭕❌ Quiz</span>
-    <span class="step" data-step="teaser">🎬 Teaser</span>
     <span class="step" data-step="form">📝 RSVP</span>
   </nav>
 
   <!-- ① Fireworks intro -->
   <section id="stage-intro" class="stage active">
     <div class="sky" id="sky" aria-hidden="true"></div>
-    <div class="moon" id="intro-moon" aria-hidden="true">🌙</div>
+    <div class="moon" aria-hidden="true">🌙</div>
     <canvas id="fireworks"></canvas>
     <div class="intro-content">
       <p class="intro-sub">YOU ARE INVITED TO</p>
       <h1 class="intro-title">
-        <span class="word w1">JIA'S&nbsp;MYSTERY</span>
-        <span class="word w2">SLEEPOVER</span>
+        <span class="word w1">JIA'S&nbsp;BIRTHDAY</span>
+        <span class="word w2">PARTY</span>
       </h1>
-      <p class="intro-tagline">a splash · a secret · a sleepover</p>
       <p class="intro-date" id="intro-date"></p>
-      <button id="btn-enter" class="btn btn-big">🎟️ Enter the Mystery</button>
+      <div class="intro-details">
+        <p>💦 <strong>Drop-off</strong> · <span id="intro-dropoff"></span></p>
+        <p>🚗 <strong>Pickup</strong> · <span id="intro-pickup"></span></p>
+        <p>🎒 <strong>Bring</strong> · <span id="intro-bring"></span></p>
+      </div>
+      <button id="btn-enter" class="btn btn-big">🎟️ I'm in! →</button>
       <p class="intro-hint">Tap anywhere to launch fireworks!</p>
     </div>
   </section>
 
-  <!-- ② Meet Jia (photo slideshow) -->
-  <section id="stage-photos" class="stage">
-    <h2 class="stage-title">📸 Let me introduce myself!</h2>
-    <div class="photo-frame">
-      <button class="photo-nav prev" id="photo-prev" aria-label="Previous photo">‹</button>
-      <figure class="photo-card" id="photo-card">
-        <img id="photo-img" src="" alt="A photo of Jia" />
-        <figcaption id="photo-caption"></figcaption>
-      </figure>
-      <button class="photo-nav next" id="photo-next" aria-label="Next photo">›</button>
-    </div>
-    <div class="photo-dots" id="photo-dots"></div>
-    <p class="swipe-hint">👈 Swipe to see more 👉</p>
-    <button id="btn-to-quiz" class="btn hidden">I know Jia now! Take the quiz →</button>
-  </section>
-
-  <!-- ③ True/False quiz about Jia -->
+  <!-- ② True/False quiz about Jia -->
   <section id="stage-quiz" class="stage">
-    <h2 class="stage-title">⭕❌ How well do you know Jia?</h2>
+    <h2 class="stage-title">⭕❌ Let's see if you know Jia!</h2>
     <p class="quiz-progress" id="quiz-progress"></p>
     <div class="quiz-card" id="quiz-card">
       <p class="quiz-question" id="quiz-question"></p>
@@ -77,30 +63,17 @@
     <div class="quiz-final hidden" id="quiz-final">
       <p class="quiz-score" id="quiz-score"></p>
       <p class="quiz-verdict" id="quiz-verdict"></p>
-      <button class="btn btn-big hidden" id="btn-quiz-pass">Challenge cleared! Next →</button>
+      <button class="btn btn-big hidden" id="btn-quiz-pass">Go to RSVP →</button>
       <button class="btn hidden" id="btn-quiz-retry">Try again 🔄</button>
     </div>
   </section>
 
-  <!-- ④ Teaser (movie-trailer style) -->
-  <section id="stage-teaser" class="stage">
-    <div class="teaser-screen" id="teaser-screen">
-      <p class="teaser-line" id="teaser-line"></p>
-      <button class="btn-skip" id="btn-teaser-skip">Skip ≫</button>
-    </div>
-    <div class="teaser-end hidden" id="teaser-end">
-      <h2 class="stage-title">What kind of night will it be...? 🤫</h2>
-      <p class="teaser-end-sub">Only four hints. The rest you'll find out at the sleepover!</p>
-      <div class="hint-cards" id="hint-cards"></div>
-      <button class="btn btn-big" id="btn-to-form">Go to RSVP →</button>
-    </div>
-  </section>
-
-  <!-- ⑤ RSVP form -->
+  <!-- ③ RSVP form -->
   <section id="stage-form" class="stage">
     <h2 class="stage-title">📝 RSVP to the Party</h2>
-    <p class="form-sub">You passed every challenge! Fill this out together with a parent 😊</p>
+    <p class="form-sub">You know Jia so well! Fill this out together with a parent 😊</p>
     <form id="rsvp-form" class="rsvp-form">
+      <input type="hidden" name="invitation" value="v2" />
       <label>
         <span class="label-title">Friend's name <span class="req">*</span></span>
         <input type="text" name="childName" required placeholder="e.g. Emma Kim" />
@@ -120,32 +93,16 @@
         <label class="radio"><input type="radio" name="attend" value="Maybe" /> Still thinking 🤔</label>
         <label class="radio"><input type="radio" name="attend" value="No" /> Sadly can't make it 😢</label>
       </fieldset>
-      <fieldset>
-        <legend>Staying for the sleepover?</legend>
-        <label class="radio"><input type="radio" name="sleepover" value="Sleeping over" /> Yes — sleeping over! 🌙</label>
-        <label class="radio"><input type="radio" name="sleepover" value="Party only" /> Party only — evening pickup 🚗</label>
-      </fieldset>
-      <fieldset>
-        <legend>Swimming comfort 💦</legend>
-        <label class="radio"><input type="radio" name="swim" value="Confident swimmer" /> Confident swimmer 🐬</label>
-        <label class="radio"><input type="radio" name="swim" value="Still learning" /> Still learning — shallow end please 🛟</label>
-        <label class="radio"><input type="radio" name="swim" value="Prefers dry land" /> Prefers dry land 🏖️</label>
-      </fieldset>
-      <fieldset>
-        <legend>Group photos 📸</legend>
-        <label class="radio"><input type="radio" name="photos" value="OK to share" /> Okay to share with party families</label>
-        <label class="radio"><input type="radio" name="photos" value="Please do not share" /> Please don't share my child's photos</label>
-      </fieldset>
       <label>
         <span class="label-title">Allergies / notes</span>
-        <textarea name="notes" rows="3" placeholder="e.g. Peanut allergy / Needs to leave at 5 PM"></textarea>
+        <textarea name="notes" rows="3" placeholder="e.g. Peanut allergy / Needs early pickup"></textarea>
       </label>
       <button type="submit" class="btn btn-big" id="btn-submit">🎉 Send RSVP</button>
       <p class="form-error hidden" id="form-error"></p>
     </form>
   </section>
 
-  <!-- ⑥ Done -->
+  <!-- ④ Done -->
   <section id="stage-done" class="stage">
     <div class="done-card">
       <div class="done-emoji">🎊</div>
@@ -153,62 +110,22 @@
       <p id="done-message">See you at the party! Jia can't wait 💜</p>
       <div class="party-info">
         <p>📅 <span id="done-date"></span></p>
-        <p>⏰ <span id="done-time"></span></p>
-        <p>📍 <span id="done-place"></span></p>
+        <p>💦 Drop-off · <span id="done-dropoff"></span></p>
+        <p>🚗 Pickup · <span id="done-pickup"></span></p>
       </div>
       <div class="bring-notice hidden" id="bring-notice">
-        <h3>🎒 Agent packing list</h3>
-        <div class="bring-group hidden" id="bring-pool">
-          <h4>💦 For the splash...</h4>
-          <ul id="pool-checklist"></ul>
-        </div>
+        <h3>🎒 Don't forget to bring</h3>
         <div class="bring-group">
-          <h4>🌙 For the night...</h4>
-          <ul id="sleep-checklist"></ul>
+          <ul id="bring-checklist"></ul>
         </div>
-      </div>
-      <div class="parent-note hidden" id="parent-note">
-        <h3>👨‍👩‍👧 For parents</h3>
-        <p id="note-supervision"></p>
-        <p id="note-pickup"></p>
-        <p id="note-bedtime"></p>
-        <p id="note-contact"></p>
-      </div>
-      <div class="manual-send hidden" id="manual-send">
-        <p>Please send your RSVP to Jia's parents using a button below!</p>
-        <button class="btn" id="btn-sms">💬 Send by text</button>
-        <button class="btn" id="btn-copy">📋 Copy to clipboard</button>
-        <p class="copy-done hidden" id="copy-done">Copied! Paste it into a text or chat message ✅</p>
       </div>
     </div>
     <canvas id="confetti"></canvas>
   </section>
 
-  <!-- 🔺 Secret HQ (이스터에그: 인트로에서 삼각형을 그리거나 달을 5번 탭) -->
-  <div id="secret-overlay" class="secret-overlay hidden" role="dialog" aria-label="Secret found">
-    <div class="secret-box">
-      <div class="secret-tri">🔺</div>
-      <h2>SECRET FOUND!</h2>
-      <p>You discovered the hidden headquarters.<br />Agents only beyond this point...</p>
-      <button class="btn btn-hq" id="btn-enter-hq">ENTER HQ 🕵️</button>
-      <button class="btn-skip" id="btn-close-secret">Back to the invitation</button>
-    </div>
-  </div>
-
-  <section id="stage-mission" class="stage mission">
-    <header class="hq-header">
-      <span class="hq-badge">TOP SECRET</span>
-      <h2>JIA'S SECRET HQ</h2>
-    </header>
-    <div id="mission-body" class="mission-body"></div>
-    <button class="btn-skip hq-exit" id="btn-exit-hq">← leave HQ</button>
-  </section>
-
-  <script src="js/config.js"></script>
-  <script src="js/mission-config.js"></script>
+  <script src="js/config-v2.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/fireworks.js"></script>
-  <script src="js/mission.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main-v2.js"></script>
 </body>
 </html>

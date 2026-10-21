@@ -10,7 +10,8 @@ const { execFileSync } = require("node:child_process");
 const ROOT = path.join(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
 
-const html = read("index.html");
+// v1(미스터리 슬립오버)은 v1.html로 보존 — 현재 공개 페이지(index.html)는 v2
+const html = read("v1.html");
 const PARTY = vm.runInNewContext(read("js/config.js") + ";PARTY_CONFIG", {});
 const MISSION = vm.runInNewContext(read("js/mission-config.js") + ";MISSION_CONFIG", {});
 
@@ -20,7 +21,7 @@ test("모든 JS 파일이 문법 오류 없이 파싱된다", () => {
   }
 });
 
-test("JS가 참조하는 모든 요소 ID가 index.html에 존재한다", () => {
+test("JS가 참조하는 모든 요소 ID가 v1.html에 존재한다", () => {
   const js = read("js/main.js") + read("js/mission.js");
   const ids = [...new Set(
     [...js.matchAll(/(?:\$\(|querySelector\()['"]#([a-zA-Z0-9_-]+)/g)].map((m) => m[1])

@@ -227,6 +227,23 @@ button, .hint-card, .progress .step { touch-action: manipulation; }
   animation: fade-up 1s 3.2s ease both;
 }
 
+/* v2: 인트로 파티 정보 카드 (드롭오프·픽업·준비물) */
+.intro-details {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 auto 26px;
+  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  color: #e4e8ff;
+  font-size: clamp(0.9rem, 3vw, 1.05rem);
+  text-align: left;
+  animation: fade-up 1s 2.3s ease both;
+}
+.intro-details strong { color: #ffd166; font-weight: 600; }
+
 /* ---------- ② 사진 슬라이드 ---------- */
 #stage-photos {
   background: linear-gradient(180deg, #fdf4ff, var(--paper));

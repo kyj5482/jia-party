@@ -9,7 +9,7 @@ const vm = require("node:vm");
 
 const ROOT = path.join(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
-const html = read("index.html");
+const html = read("v1.html"); // v1 전용 테스트 — 공개 페이지(index.html)는 v2
 const PARTY = vm.runInNewContext(read("js/config.js") + ";PARTY_CONFIG", {});
 const MISSION = vm.runInNewContext(read("js/mission-config.js") + ";MISSION_CONFIG", {});
 

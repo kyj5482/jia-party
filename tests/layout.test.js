@@ -15,7 +15,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
-const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+// 두 초대장 모두 감사: index.html(v2, 공개 페이지), v1.html(미스터리 슬립오버)
+const PAGES = ["index.html", "v1.html"].map((f) => ({
+  file: f,
+  html: fs.readFileSync(path.join(ROOT, f), "utf8"),
+}));
 // 주석은 셀렉터 매칭을 방해하므로 제거하고 파싱
 const css = fs.readFileSync(path.join(ROOT, "css/style.css"), "utf8")
   .replace(/\/\*[\s\S]*?\*\//g, "");
@@ -54,14 +58,16 @@ const KNOWN_CONTAINERS = [
   "stage-intro", "stage-photos", "stage-quiz", "stage-teaser",
   "stage-form", "stage-done", "secret-overlay", "stage-mission",
 ];
-const containerStarts = KNOWN_CONTAINERS
-  .map((id) => ({ id, at: html.indexOf(`id="${id}"`) }))
-  .filter((c) => c.at >= 0)
-  .sort((a, b) => a.at - b.at);
+function containerStartsOf(html) {
+  return KNOWN_CONTAINERS
+    .map((id) => ({ id, at: html.indexOf(`id="${id}"`) }))
+    .filter((c) => c.at >= 0)
+    .sort((a, b) => a.at - b.at);
+}
 
-function containerAt(index) {
+function containerAt(html, index) {
   let cur = null;
-  for (const c of containerStarts) {
+  for (const c of containerStartsOf(html)) {
     if (c.at < index) cur = c.id;
     else break;
   }
@@ -69,7 +75,7 @@ function containerAt(index) {
 }
 
 // 인터랙티브 요소(버튼/입력/링크)와 그 클래스 목록
-function interactiveElements() {
+function interactiveElements(html) {
   const out = [];
   const re = /<(button|a|input)\b[^>]*class="([^"]*)"/g;
   let m;
@@ -102,14 +108,15 @@ const ALLOWED_USES = [
 
 test("절대배치 클래스는 등록된 화면에서만, 보정 CSS와 함께 사용된다", () => {
   const problems = [];
-  for (const elem of interactiveElements()) {
+  for (const { file, html } of PAGES)
+  for (const elem of interactiveElements(html)) {
     for (const cls of elem.classes) {
       if (!positionedClasses.has(cls)) continue;
-      const container = containerAt(elem.at);
+      const container = containerAt(html, elem.at);
       const allow = ALLOWED_USES.find((a) => a.cls === cls && a.container === container);
       if (!allow) {
         problems.push(
-          `절대배치 클래스 .${cls} 가 미등록 화면(#${container})의 <${elem.tag}>에 사용됨 — ` +
+          `[${file}] 절대배치 클래스 .${cls} 가 미등록 화면(#${container})의 <${elem.tag}>에 사용됨 — ` +
           `겹침 위험! tests/layout.test.js의 ALLOWED_USES에 등록하고 보정 CSS를 추가하세요.`
         );
         continue;
@@ -152,7 +159,8 @@ test("화면 공통 padding-top이 고정 진행바 높이 이상이다", () => 
 test("인터랙티브 요소에 left와 right가 동시에 적용되는 조합이 없다", () => {
   // 요소별로 적용되는 클래스들의 CSS를 합쳐 left/right 지정이 둘 다 살아있는지 검사
   const problems = [];
-  for (const elem of interactiveElements()) {
+  for (const { file, html } of PAGES)
+  for (const elem of interactiveElements(html)) {
     let left = null, right = null;
     for (const cls of elem.classes) {
       for (const b of blocksFor("." + cls)) {
@@ -164,7 +172,7 @@ test("인터랙티브 요소에 left와 right가 동시에 적용되는 조합�
     }
     if (left && right && left !== "auto" && right !== "auto") {
       problems.push(
-        `<${elem.tag} class="${elem.classes.join(" ")}"> 에 left:${left} 와 right:${right} 가 ` +
+        `[${file}] <${elem.tag} class="${elem.classes.join(" ")}"> 에 left:${left} 와 right:${right} 가 ` +
         `동시 적용 — 버튼이 가로로 늘어납니다. 한쪽을 auto로 해제하세요.`
       );
     }
