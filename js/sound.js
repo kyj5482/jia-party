@@ -27,6 +27,7 @@ window.JiaSound = (function () {
         master.connect(comp).connect(ctx.destination);
       }
       if (ctx.state === "suspended") ctx.resume();
+      decodeSamples(); // ctx가 준비되면 폭죽 녹음 샘플 디코딩 시작 (1회)
       return ctx.state !== "suspended";
     } catch (e) {
       return false; // 오디오가 실패해도 화면 동작(클릭 핸들러)은 절대 막지 않음
@@ -62,6 +63,42 @@ window.JiaSound = (function () {
       unlockMediaSession();
       ensure();
     }, { capture: true, passive: true }));
+
+  // ---------- 실제 폭죽 녹음 샘플 ----------
+  // 출처: Wikimedia Commons 퍼블릭 도메인 녹음 (PDSounds 이전본 등)에서
+  // 단일 파열 구간을 추출·정규화한 것. 합성음으로는 실제 폭발의
+  // 충격파·공간 잔향을 재현하기 어려워 파열음은 녹음을 재생한다.
+  const BOOM_URLS = [1, 2, 3, 4, 5, 6].map((i) => `assets/sfx/boom${i}.mp3`);
+  let boomBuffers = [];
+  // 네트워크 선로딩은 페이지 로드 직후 시작 (디코딩은 ctx가 생긴 뒤)
+  const boomFetch = window.fetch
+    ? Promise.all(BOOM_URLS.map((u) =>
+        fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.arrayBuffer(); })
+      )).catch(() => null)
+    : Promise.resolve(null);
+  let decodeStarted = false;
+  function decodeSamples() {
+    if (decodeStarted || !ctx) return;
+    decodeStarted = true;
+    boomFetch.then((bufs) => {
+      if (!bufs) return; // 로드 실패 → 합성음 폴백 사용
+      // 콜백형 decodeAudioData — 구형 iOS Safari 호환
+      bufs.forEach((ab) => {
+        try { ctx.decodeAudioData(ab, (b) => boomBuffers.push(b), () => {}); } catch (e) {}
+      });
+    });
+  }
+
+  function playSample(buf, { rate = 1, vol = 1, delay = 0 }) {
+    const t0 = ctx.currentTime + delay;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate;
+    const g = ctx.createGain();
+    g.gain.value = vol;
+    src.connect(g).connect(master);
+    src.start(t0);
+  }
 
   // 단일 톤 (주파수 슬라이드/감쇠 지원)
   function tone({ freq = 440, to = null, dur = 0.15, type = "sine", vol = 0.18, delay = 0 }) {
@@ -127,19 +164,52 @@ window.JiaSound = (function () {
       noise({ dur: 0.6, vol: 0.1, from: 2000, to: 300, delay: 0.5 });
     },
     // ---------- 불꽃놀이 ----------
-    launch() { noise({ dur: 0.45, vol: 0.14, from: 300, to: 1800, type: "bandpass" }); },
-    // 실제 폭죽 구조: ① 광대역 "빵!" 파열 → ② 길게 울리는 잔향 → ③ 잔불 "타다닥"
-    // 순음(사인파) 저음은 북소리처럼 들려서 쓰지 않음 — 전부 노이즈 기반
+    // 발사음: 실제 휘슬 폭죽처럼 — 올라가며 높아지는 순음 글라이드에
+    // 빠른 워블(진동)과 추진 쉬익(노이즈)을 얹음. 로켓 비행 ~1.2초와 동기.
+    launch() {
+      if (!ensure()) return;
+      const t0 = ctx.currentTime;
+      const dur = 0.95 + Math.random() * 0.25;
+      const f0 = 550 + Math.random() * 200;
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(f0, t0);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 2.3, t0 + dur); // 상승 글라이드
+      const vib = ctx.createOscillator(); // 휘슬 특유의 빠른 떨림
+      vib.frequency.value = 35 + Math.random() * 30;
+      const vibG = ctx.createGain();
+      vibG.gain.value = 40;
+      vib.connect(vibG).connect(osc.frequency);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.12);
+      g.gain.setValueAtTime(0.1, t0 + dur - 0.3);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); // 멀어지며 사라짐
+      osc.connect(g).connect(master);
+      osc.start(t0); osc.stop(t0 + dur + 0.05);
+      vib.start(t0); vib.stop(t0 + dur + 0.05);
+      noise({ dur, vol: 0.05, from: 800, to: 2600, type: "bandpass" }); // 추진 쉬익
+    },
+    // 파열음: 실제 폭죽 녹음(퍼블릭 도메인) 재생 — 발마다 다른 샘플을
+    // 피치·음량을 살짝 바꿔 재생해 같은 소리가 반복되지 않게 한다.
     boom() {
-      const v = 0.8 + Math.random() * 0.4; // 발마다 크기가 조금씩 다르게
-      // ① 파열 "빵!" — 밝은 광대역 노이즈가 순간 터진 뒤 스펙트럼이 어두워지며 감쇠
+      if (!ensure()) return;
+      if (boomBuffers.length) {
+        let i = (Math.random() * boomBuffers.length) | 0;
+        if (boomBuffers.length > 1 && i === api._lastBoom) i = (i + 1) % boomBuffers.length;
+        api._lastBoom = i;
+        playSample(boomBuffers[i], {
+          rate: 0.92 + Math.random() * 0.2,
+          vol: 0.9 + Math.random() * 0.3,
+        });
+        return;
+      }
+      // 폴백 (샘플 로딩 전/실패): 합성 — 파열 + 잔향 + 크래클
+      const v = 0.8 + Math.random() * 0.4;
       noise({ dur: 0.05, vol: 0.45 * v, from: 8000, to: 4000, type: "highpass" });
       noise({ dur: 1.5, vol: 0.5 * v, from: 6000, to: 110 });
-      // ② 멀리 울리는 잔향 "우르르릉" (저역 노이즈, 살짝 늦게)
       noise({ dur: 2.4, vol: 0.18 * v, from: 350, to: 45, delay: 0.12 });
-      // ③ 잔불이 터지는 "타다닥" 크래클 — 폭죽임을 결정짓는 소리
-      const pops = 16 + ((Math.random() * 14) | 0);
-      for (let i = 0; i < pops; i++) {
+      for (let i = 0, pops = 16 + ((Math.random() * 14) | 0); i < pops; i++) {
         noise({
           dur: 0.015 + Math.random() * 0.03,
           vol: 0.05 + Math.random() * 0.12,
@@ -162,6 +232,8 @@ window.JiaSound = (function () {
       const scale = [392, 494, 587, 784]; // G4 B4 D5 G5
       tone({ freq: scale[i % 4], dur: 0.3, type: "triangle", vol: 0.16 });
     },
+    // ---------- 진단 ----------
+    get _boomsReady() { return boomBuffers.length; }, // 디코딩된 폭죽 샘플 수
     // ---------- 음소거 ----------
     get muted() { return muted; },
     toggleMute() {

@@ -58,6 +58,17 @@ test("사진: 모든 src 파일이 실제로 존재한다", () => {
   }
 });
 
+test("효과음: sound.js가 참조하는 폭죽 녹음 샘플이 모두 존재한다", () => {
+  const js = read("js/sound.js");
+  const m = js.match(/\[([\d,\s]+)\]\.map\(\(i\) => `assets\/sfx\/boom\$\{i\}\.mp3`\)/);
+  assert.ok(m, "sound.js에서 샘플 URL 목록을 찾지 못함");
+  for (const i of m[1].split(",").map((s) => s.trim())) {
+    const f = `assets/sfx/boom${i}.mp3`;
+    assert.ok(fs.existsSync(path.join(ROOT, f)), `샘플 파일 없음: ${f}`);
+    assert.ok(fs.statSync(path.join(ROOT, f)).size > 5000, `샘플 파일이 너무 작음: ${f}`);
+  }
+});
+
 test("티저: 피날레 줄에 'JIA'가 포함된다 (그라데이션 트리거)", () => {
   assert.ok(PARTY.teaserLines.some((l) => l.includes("JIA")), "finale 스타일이 적용될 줄이 없음");
 });

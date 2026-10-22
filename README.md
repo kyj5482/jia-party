@@ -21,6 +21,12 @@
 
 RSVP 신청은 Formspree(https://formspree.io/f/mvkzdker)로 접수되어 이메일로 도착합니다.
 
+**효과음**: 폭죽 파열음(`assets/sfx/boom*.mp3`)은 Wikimedia Commons의 퍼블릭 도메인
+녹음에서 추출했습니다 — [Fireworks in distance 6](https://commons.wikimedia.org/wiki/File:Fireworks_in_distance_6.ogg),
+[Silvester fireworks from the street 02](https://commons.wikimedia.org/wiki/File:Silvester_fireworks_from_the_street_02_cool_stuff.ogg),
+[Fireworks piece](https://commons.wikimedia.org/wiki/File:Fireworks_piece.ogg) (모두 Public Domain).
+나머지 효과음은 `js/sound.js`에서 Web Audio API로 합성합니다.
+
 1. **🎆 불꽃놀이 인트로** — 캔버스 불꽃놀이 애니메이션과 타이틀 등장
 2. **📸 지아 알아가기** — 지아의 사진 슬라이드쇼 (사진마다 소개 문구)
 3. **⭕❌ 지아 더 알기 퀴즈** — O/X 퀴즈로 지아가 좋아하는 것 맞추기 (기준 점수 통과 필요)
