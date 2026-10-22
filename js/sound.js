@@ -16,7 +16,12 @@ window.JiaSound = (function () {
       ctx = new AC();
       master = ctx.createGain();
       master.gain.value = 0.5;
-      master.connect(ctx.destination);
+      // 컴프레서: 폭죽 여러 발이 겹쳐도 소리가 찌그러지지 않게 피크를 눌러줌
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -14;
+      comp.knee.value = 18;
+      comp.ratio.value = 6;
+      master.connect(comp).connect(ctx.destination);
     }
     if (ctx.state === "suspended") ctx.resume();
     return ctx.state !== "suspended";
@@ -88,10 +93,14 @@ window.JiaSound = (function () {
       noise({ dur: 0.6, vol: 0.1, from: 2000, to: 300, delay: 0.5 });
     },
     // ---------- 불꽃놀이 ----------
-    launch() { noise({ dur: 0.45, vol: 0.05, from: 300, to: 1800, type: "bandpass" }); },
+    launch() { noise({ dur: 0.45, vol: 0.14, from: 300, to: 1800, type: "bandpass" }); },
     boom() {
-      noise({ dur: 0.7, vol: 0.14, from: 900, to: 60 });
-      tone({ freq: 70, to: 40, dur: 0.5, type: "sine", vol: 0.14 });
+      // 고역 파열음 "딱!" — 휴대폰 스피커는 저음을 거의 못 내므로 이게 체감 음량을 좌우
+      noise({ dur: 0.12, vol: 0.4, from: 3500, to: 900, type: "bandpass" });
+      // 폭발 본체 (중역 위주로 시작해 낮게 깔림)
+      noise({ dur: 0.8, vol: 0.5, from: 1600, to: 80 });
+      // 저역 울림 (좋은 스피커에서 몸으로 느끼는 "쿵")
+      tone({ freq: 110, to: 45, dur: 0.6, type: "sine", vol: 0.3 });
     },
     // ---------- 미로 ----------
     step() { tone({ freq: 260, dur: 0.03, type: "square", vol: 0.04 }); },
