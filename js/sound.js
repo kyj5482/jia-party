@@ -128,13 +128,27 @@ window.JiaSound = (function () {
     },
     // ---------- 불꽃놀이 ----------
     launch() { noise({ dur: 0.45, vol: 0.14, from: 300, to: 1800, type: "bandpass" }); },
+    // 실제 폭죽 구조: ① 광대역 "빵!" 파열 → ② 길게 울리는 잔향 → ③ 잔불 "타다닥"
+    // 순음(사인파) 저음은 북소리처럼 들려서 쓰지 않음 — 전부 노이즈 기반
     boom() {
-      // 고역 파열음 "딱!" — 휴대폰 스피커는 저음을 거의 못 내므로 이게 체감 음량을 좌우
-      noise({ dur: 0.12, vol: 0.4, from: 3500, to: 900, type: "bandpass" });
-      // 폭발 본체 (중역 위주로 시작해 낮게 깔림)
-      noise({ dur: 0.8, vol: 0.5, from: 1600, to: 80 });
-      // 저역 울림 (좋은 스피커에서 몸으로 느끼는 "쿵")
-      tone({ freq: 110, to: 45, dur: 0.6, type: "sine", vol: 0.3 });
+      const v = 0.8 + Math.random() * 0.4; // 발마다 크기가 조금씩 다르게
+      // ① 파열 "빵!" — 밝은 광대역 노이즈가 순간 터진 뒤 스펙트럼이 어두워지며 감쇠
+      noise({ dur: 0.05, vol: 0.45 * v, from: 8000, to: 4000, type: "highpass" });
+      noise({ dur: 1.5, vol: 0.5 * v, from: 6000, to: 110 });
+      // ② 멀리 울리는 잔향 "우르르릉" (저역 노이즈, 살짝 늦게)
+      noise({ dur: 2.4, vol: 0.18 * v, from: 350, to: 45, delay: 0.12 });
+      // ③ 잔불이 터지는 "타다닥" 크래클 — 폭죽임을 결정짓는 소리
+      const pops = 16 + ((Math.random() * 14) | 0);
+      for (let i = 0; i < pops; i++) {
+        noise({
+          dur: 0.015 + Math.random() * 0.03,
+          vol: 0.05 + Math.random() * 0.12,
+          from: 2500 + Math.random() * 5500,
+          to: 1800,
+          type: "bandpass",
+          delay: 0.1 + Math.random() * 1.2,
+        });
+      }
     },
     // ---------- 미로 ----------
     step() { tone({ freq: 260, dur: 0.03, type: "square", vol: 0.04 }); },
