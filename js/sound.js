@@ -6,28 +6,62 @@
 window.JiaSound = (function () {
   let ctx = null;
   let master = null;
-  let muted = localStorage.getItem("jia_muted") === "1";
+  // 음소거는 세션 단위로만 기억 — 실수로 누른 음소거가 다음 방문까지
+  // 남아 "소리가 아예 안 나요"가 되는 것을 방지 (예전엔 localStorage 영구 저장)
+  let muted = sessionStorage.getItem("jia_muted") === "1";
 
   function ensure() {
     if (muted) return false;
-    if (!ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return false;
-      ctx = new AC();
-      master = ctx.createGain();
-      master.gain.value = 0.5;
-      // 컴프레서: 폭죽 여러 발이 겹쳐도 소리가 찌그러지지 않게 피크를 눌러줌
-      const comp = ctx.createDynamicsCompressor();
-      comp.threshold.value = -14;
-      comp.knee.value = 18;
-      comp.ratio.value = 6;
-      master.connect(comp).connect(ctx.destination);
+    try {
+      if (!ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        ctx = new AC();
+        master = ctx.createGain();
+        master.gain.value = 0.5;
+        // 컴프레서: 폭죽 여러 발이 겹쳐도 소리가 찌그러지지 않게 피크를 눌러줌
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -14;
+        comp.knee.value = 18;
+        comp.ratio.value = 6;
+        master.connect(comp).connect(ctx.destination);
+      }
+      if (ctx.state === "suspended") ctx.resume();
+      return ctx.state !== "suspended";
+    } catch (e) {
+      return false; // 오디오가 실패해도 화면 동작(클릭 핸들러)은 절대 막지 않음
     }
-    if (ctx.state === "suspended") ctx.resume();
-    return ctx.state !== "suspended";
   }
-  // 첫 제스처에서 오디오 컨텍스트 활성화
-  document.addEventListener("pointerdown", () => { if (!muted) ensure(); }, { capture: true });
+
+  // iOS 무음(진동) 스위치 대응: Web Audio는 iOS에서 무음 스위치에 걸려
+  // 통째로 음소거되지만 <audio> 태그 재생은 걸리지 않는다. 첫 제스처에서
+  // 무음 WAV를 루프 재생해 오디오 세션을 '미디어 재생'으로 승격시키면
+  // 무음 스위치가 켜져 있어도 Web Audio 효과음이 들린다.
+  let mediaUnlocked = false;
+  function unlockMediaSession() {
+    if (mediaUnlocked) return;
+    mediaUnlocked = true;
+    try {
+      const a = document.createElement("audio");
+      a.setAttribute("playsinline", "");
+      a.loop = true;
+      // 0.05초 무음 WAV (8kHz 8-bit mono)
+      a.src = "data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+      const p = a.play();
+      if (p && p.catch) p.catch(() => { mediaUnlocked = false; });
+    } catch (e) {
+      mediaUnlocked = false;
+    }
+  }
+
+  // 첫 제스처에서 오디오 활성화 — iOS 버전에 따라 인정되는 제스처가 달라
+  // 여러 이벤트에 걸어둔다 (pointerdown만으로는 일부 iOS에서 잠금 해제 실패)
+  ["pointerdown", "touchend", "click", "keydown"].forEach((ev) =>
+    document.addEventListener(ev, () => {
+      if (muted) return;
+      unlockMediaSession();
+      ensure();
+    }, { capture: true, passive: true }));
 
   // 단일 톤 (주파수 슬라이드/감쇠 지원)
   function tone({ freq = 440, to = null, dur = 0.15, type = "sine", vol = 0.18, delay = 0 }) {
@@ -118,8 +152,8 @@ window.JiaSound = (function () {
     get muted() { return muted; },
     toggleMute() {
       muted = !muted;
-      localStorage.setItem("jia_muted", muted ? "1" : "0");
-      if (!muted) { ensure(); api.tap(); }
+      sessionStorage.setItem("jia_muted", muted ? "1" : "0");
+      if (!muted) { unlockMediaSession(); ensure(); api.tap(); }
       return muted;
     },
   };

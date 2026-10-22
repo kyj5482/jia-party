@@ -65,7 +65,11 @@
 
   // ---------- 🔊 효과음 ----------
   const sndBtn = $("#sound-toggle");
-  const syncSnd = () => { sndBtn.textContent = JiaSound.muted ? "🔇" : "🔊"; };
+  const syncSnd = () => {
+    sndBtn.textContent = JiaSound.muted ? "🔇" : "🔊";
+    sndBtn.classList.toggle("muted", JiaSound.muted);
+    sndBtn.title = JiaSound.muted ? "Sound is OFF — tap to unmute" : "Sound is on";
+  };
   sndBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     JiaSound.toggleMute();
