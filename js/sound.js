@@ -62,42 +62,62 @@ window.JiaSound = (function () {
       if (muted) return;
       unlockMediaSession();
       ensure();
+      // Android Chrome: 첫 터치가 '완전한 상호작용'으로 집계되기 전에 resume()이
+      // 거부되는 경우가 있어, 조금 뒤 한 번 더 시도 (Firework Simulator 기법)
+      setTimeout(() => { if (ctx && ctx.state === "suspended") ctx.resume(); }, 250);
     }, { capture: true, passive: true }));
 
-  // ---------- 실제 폭죽 녹음 샘플 ----------
-  // 출처: Wikimedia Commons 퍼블릭 도메인 녹음 (PDSounds 이전본 등)에서
-  // 단일 파열 구간을 추출·정규화한 것. 합성음으로는 실제 폭발의
-  // 충격파·공간 잔향을 재현하기 어려워 파열음은 녹음을 재생한다.
-  const BOOM_URLS = [1, 2, 3, 4, 5, 6].map((i) => `assets/sfx/boom${i}.mp3`);
-  let boomBuffers = [];
+  // ---------- 실제 폭죽 녹음 샘플 (CC0) ----------
+  // 웹 폭죽 데모 10여 곳 조사 결과의 공통 베스트 프랙티스 구조:
+  // 역할별 사운드 뱅크(lift 발사 / burst 파열 / crackle 잔불)에서
+  // 매번 다른 샘플을 재생속도·음량을 살짝 바꿔 재생 (Firework Simulator 방식).
+  // 음원: OpenGameArt "25 CC0 bang/firework SFX" by rubberduck (퍼블릭 도메인)
+  // https://opengameart.org/content/25-cc0-bang-firework-sfx
+  const SFX_BANKS = {
+    lift:    { files: ["lift1", "lift2", "lift3"], vol: 0.3, rateMin: 0.85, rateMax: 0.95 },
+    burst:   { files: ["burst1", "burst2", "burst3", "burst4", "burst5", "burst6", "burst7", "burst8"],
+               vol: 1.0, rateMin: 0.8, rateMax: 0.9 },
+    crackle: { files: ["crackle1"], vol: 0.25, rateMin: 0.95, rateMax: 1.05 },
+  };
+  Object.values(SFX_BANKS).forEach((b) => { b.buffers = []; b.last = -1; });
+
   // 네트워크 선로딩은 페이지 로드 직후 시작 (디코딩은 ctx가 생긴 뒤)
-  const boomFetch = window.fetch
-    ? Promise.all(BOOM_URLS.map((u) =>
-        fetch(u).then((r) => { if (!r.ok) throw new Error(u); return r.arrayBuffer(); })
+  const sfxFetch = window.fetch
+    ? Promise.all(Object.entries(SFX_BANKS).map(([name, b]) =>
+        Promise.all(b.files.map((f) =>
+          fetch(`assets/sfx/${f}.mp3`).then((r) => { if (!r.ok) throw new Error(f); return r.arrayBuffer(); })
+        )).then((abs) => [name, abs])
       )).catch(() => null)
     : Promise.resolve(null);
   let decodeStarted = false;
   function decodeSamples() {
     if (decodeStarted || !ctx) return;
     decodeStarted = true;
-    boomFetch.then((bufs) => {
-      if (!bufs) return; // 로드 실패 → 합성음 폴백 사용
-      // 콜백형 decodeAudioData — 구형 iOS Safari 호환
-      bufs.forEach((ab) => {
-        try { ctx.decodeAudioData(ab, (b) => boomBuffers.push(b), () => {}); } catch (e) {}
-      });
+    sfxFetch.then((banks) => {
+      if (!banks) return; // 로드 실패 → 합성음 폴백 사용
+      banks.forEach(([name, abs]) => abs.forEach((ab) => {
+        // 콜백형 decodeAudioData — 구형 iOS Safari 호환
+        try { ctx.decodeAudioData(ab, (b) => SFX_BANKS[name].buffers.push(b), () => {}); } catch (e) {}
+      }));
     });
   }
 
-  function playSample(buf, { rate = 1, vol = 1, delay = 0 }) {
+  // 뱅크에서 직전과 다른 샘플을 골라 재생. 재생 성공 시 true.
+  function playBank(name, { volScale = 1, delay = 0 } = {}) {
+    const bank = SFX_BANKS[name];
+    if (!bank.buffers.length) return false;
+    let i = (Math.random() * bank.buffers.length) | 0;
+    if (bank.buffers.length > 1 && i === bank.last) i = (i + 1) % bank.buffers.length;
+    bank.last = i;
     const t0 = ctx.currentTime + delay;
     const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.playbackRate.value = rate;
+    src.buffer = bank.buffers[i];
+    src.playbackRate.value = bank.rateMin + Math.random() * (bank.rateMax - bank.rateMin);
     const g = ctx.createGain();
-    g.gain.value = vol;
+    g.gain.value = bank.vol * volScale * (0.85 + Math.random() * 0.3);
     src.connect(g).connect(master);
     src.start(t0);
+    return true;
   }
 
   // 단일 톤 (주파수 슬라이드/감쇠 지원)
@@ -163,45 +183,19 @@ window.JiaSound = (function () {
       tone({ freq: 1046, dur: 0.8, type: "triangle", vol: 0.16, delay: 0.5 });
       noise({ dur: 0.6, vol: 0.1, from: 2000, to: 300, delay: 0.5 });
     },
-    // ---------- 불꽃놀이 ----------
-    // 발사음: 실제 휘슬 폭죽처럼 — 올라가며 높아지는 순음 글라이드에
-    // 빠른 워블(진동)과 추진 쉬익(노이즈)을 얹음. 로켓 비행 ~1.2초와 동기.
+    // ---------- 불꽃놀이 (조사한 베스트 프랙티스: 역할별 녹음 뱅크) ----------
+    // 발사음: 포신에서 쏘아 올리는 "퉁!" (낮은 피치·작은 음량의 실제 포성)
     launch() {
       if (!ensure()) return;
-      const t0 = ctx.currentTime;
-      const dur = 0.95 + Math.random() * 0.25;
-      const f0 = 550 + Math.random() * 200;
-      const osc = ctx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(f0, t0);
-      osc.frequency.exponentialRampToValueAtTime(f0 * 2.3, t0 + dur); // 상승 글라이드
-      const vib = ctx.createOscillator(); // 휘슬 특유의 빠른 떨림
-      vib.frequency.value = 35 + Math.random() * 30;
-      const vibG = ctx.createGain();
-      vibG.gain.value = 40;
-      vib.connect(vibG).connect(osc.frequency);
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.12);
-      g.gain.setValueAtTime(0.1, t0 + dur - 0.3);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); // 멀어지며 사라짐
-      osc.connect(g).connect(master);
-      osc.start(t0); osc.stop(t0 + dur + 0.05);
-      vib.start(t0); vib.stop(t0 + dur + 0.05);
-      noise({ dur, vol: 0.05, from: 800, to: 2600, type: "bandpass" }); // 추진 쉬익
+      if (playBank("lift")) return;
+      // 폴백: 짧은 상승 휘익 (합성)
+      noise({ dur: 0.45, vol: 0.12, from: 300, to: 1800, type: "bandpass" });
     },
-    // 파열음: 실제 폭죽 녹음(퍼블릭 도메인) 재생 — 발마다 다른 샘플을
-    // 피치·음량을 살짝 바꿔 재생해 같은 소리가 반복되지 않게 한다.
+    // 파열음: 실제 파열 녹음 8종 중 직전과 다른 것 + 때때로 잔불 크래클 레이어
     boom() {
       if (!ensure()) return;
-      if (boomBuffers.length) {
-        let i = (Math.random() * boomBuffers.length) | 0;
-        if (boomBuffers.length > 1 && i === api._lastBoom) i = (i + 1) % boomBuffers.length;
-        api._lastBoom = i;
-        playSample(boomBuffers[i], {
-          rate: 0.92 + Math.random() * 0.2,
-          vol: 0.9 + Math.random() * 0.3,
-        });
+      if (playBank("burst")) {
+        if (Math.random() < 0.45) playBank("crackle", { delay: 0.1 + Math.random() * 0.15 });
         return;
       }
       // 폴백 (샘플 로딩 전/실패): 합성 — 파열 + 잔향 + 크래클
@@ -233,7 +227,9 @@ window.JiaSound = (function () {
       tone({ freq: scale[i % 4], dur: 0.3, type: "triangle", vol: 0.16 });
     },
     // ---------- 진단 ----------
-    get _boomsReady() { return boomBuffers.length; }, // 디코딩된 폭죽 샘플 수
+    get _boomsReady() { // 디코딩된 폭죽 샘플 수 (전 뱅크 합산)
+      return Object.values(SFX_BANKS).reduce((n, b) => n + b.buffers.length, 0);
+    },
     // ---------- 음소거 ----------
     get muted() { return muted; },
     toggleMute() {

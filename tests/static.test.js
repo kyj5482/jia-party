@@ -58,14 +58,20 @@ test("사진: 모든 src 파일이 실제로 존재한다", () => {
   }
 });
 
-test("효과음: sound.js가 참조하는 폭죽 녹음 샘플이 모두 존재한다", () => {
+test("효과음: sound.js의 사운드 뱅크가 참조하는 샘플이 모두 존재한다", () => {
   const js = read("js/sound.js");
-  const m = js.match(/\[([\d,\s]+)\]\.map\(\(i\) => `assets\/sfx\/boom\$\{i\}\.mp3`\)/);
-  assert.ok(m, "sound.js에서 샘플 URL 목록을 찾지 못함");
-  for (const i of m[1].split(",").map((s) => s.trim())) {
-    const f = `assets/sfx/boom${i}.mp3`;
+  // SFX_BANKS의 files: ["lift1", ...] 목록 수집
+  const names = [...js.matchAll(/files:\s*\[([^\]]+)\]/g)]
+    .flatMap((m) => m[1].split(",").map((s) => s.trim().replace(/['"]/g, "")));
+  assert.ok(names.length >= 10, `샘플 목록이 너무 적음 (${names.length}개) — SFX_BANKS 파싱 실패?`);
+  for (const name of names) {
+    const f = `assets/sfx/${name}.mp3`;
     assert.ok(fs.existsSync(path.join(ROOT, f)), `샘플 파일 없음: ${f}`);
     assert.ok(fs.statSync(path.join(ROOT, f)).size > 5000, `샘플 파일이 너무 작음: ${f}`);
+  }
+  // 뱅크 3종(발사/파열/크래클)이 모두 있어야 함
+  for (const bank of ["lift:", "burst:", "crackle:"]) {
+    assert.ok(js.includes(bank), `SFX_BANKS에 ${bank} 뱅크가 없음`);
   }
 });
 
