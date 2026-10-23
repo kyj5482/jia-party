@@ -65,10 +65,12 @@
     syncSnd();
   });
   syncSnd();
-  // 공통 버튼 탭음
+  // 공통 버튼 탭음 (자체 효과음이 있는 미션 게임 버튼은 제외)
   document.addEventListener("click", (e) => {
     const b = e.target.closest("button");
-    if (!b || b.id === "sound-toggle") return;
+    if (!b) return;
+    if (b.classList.contains("simon-pad") || b.classList.contains("pin-key") ||
+        b.classList.contains("dpad-btn") || b.id === "sound-toggle") return;
     JiaSound.tap();
   });
 
@@ -79,6 +81,89 @@
   $("#intro-bring").textContent = C.bringList.join(" & ");
   fireworks = JiaFX.startFireworks($("#fireworks"));
   $("#btn-enter").addEventListener("click", () => { startQuiz(); goToStage("quiz"); });
+
+  // ---------- 🔺 이스터에그: Secret HQ (v1과 동일) ----------
+  // 방법 1: 인트로 화면에서 손가락으로 삼각형(닫힌 도형) 그리기
+  // 방법 2: 달(🌙)을 3.5초 안에 5번 연속 탭
+  const introStage = $("#stage-intro");
+  let drawPts = [];
+  let drawing = false;
+
+  introStage.addEventListener("pointerdown", (e) => {
+    drawing = true;
+    drawPts = [[e.clientX, e.clientY]];
+  });
+  introStage.addEventListener("pointermove", (e) => {
+    if (drawing) drawPts.push([e.clientX, e.clientY]);
+  });
+  function endDraw() {
+    if (drawing && detectTriangle(drawPts)) showSecret();
+    drawing = false;
+    drawPts = [];
+  }
+  introStage.addEventListener("pointerup", endDraw);
+  introStage.addEventListener("pointercancel", endDraw);
+
+  function detectTriangle(pts) {
+    if (pts.length < 12) return false;
+    let len = 0;
+    for (let i = 1; i < pts.length; i++) {
+      len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    }
+    if (len < 200) return false; // 너무 짧은 끄적임은 무시
+    const dEnd = Math.hypot(
+      pts[0][0] - pts[pts.length - 1][0],
+      pts[0][1] - pts[pts.length - 1][1]
+    );
+    if (dEnd > Math.max(90, len * 0.25)) return false; // 닫힌 도형이어야 함
+
+    // 경로를 일정 간격으로 리샘플링한 뒤 급격한 방향 전환(코너) 수 세기
+    const step = len / 36;
+    const rs = [pts[0]];
+    let acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (acc >= step) { rs.push(pts[i]); acc = 0; }
+    }
+    let corners = 0, lastAng = null, cooldown = 0;
+    for (let i = 1; i < rs.length; i++) {
+      const ang = Math.atan2(rs[i][1] - rs[i - 1][1], rs[i][0] - rs[i - 1][0]);
+      if (lastAng !== null && cooldown <= 0) {
+        let d = Math.abs(ang - lastAng);
+        if (d > Math.PI) d = 2 * Math.PI - d;
+        if (d > 0.7) { corners++; cooldown = 3; }
+      }
+      cooldown--;
+      lastAng = ang;
+    }
+    return corners >= 2 && corners <= 5; // 삼각형(모서리 2~3개 감지)이면 통과
+  }
+
+  // 보조 경로: 달 5번 연속 탭
+  let moonTaps = 0, moonTimer = null;
+  $("#intro-moon").addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    moonTaps++;
+    clearTimeout(moonTimer);
+    moonTimer = setTimeout(() => { moonTaps = 0; }, 3500);
+    if (moonTaps >= 5) { moonTaps = 0; showSecret(); }
+  });
+
+  function showSecret() {
+    const overlay = $("#secret-overlay");
+    if (!overlay.classList.contains("hidden")) return;
+    JiaSound.sparkle();
+    overlay.classList.remove("hidden");
+  }
+  $("#btn-close-secret").addEventListener("click", () => {
+    $("#secret-overlay").classList.add("hidden");
+  });
+  $("#btn-enter-hq").addEventListener("click", () => {
+    $("#secret-overlay").classList.add("hidden");
+    if (fireworks) { fireworks.stop(); fireworks = null; }
+    JiaHQ.open();
+  });
+  $("#btn-exit-hq").addEventListener("click", () => goToStage("intro"));
 
   // 밤하늘 별 생성
   (function makeStars() {

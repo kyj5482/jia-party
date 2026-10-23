@@ -19,8 +19,8 @@ test("v2: JS 파일이 문법 오류 없이 파싱된다", () => {
   }
 });
 
-test("v2: main-v2.js가 참조하는 모든 요소 ID가 index.html에 존재한다", () => {
-  const js = read("js/main-v2.js");
+test("v2: main-v2.js와 mission.js가 참조하는 모든 요소 ID가 index.html에 존재한다", () => {
+  const js = read("js/main-v2.js") + read("js/mission.js"); // 시크릿 HQ도 v2에서 동작
   const ids = [...new Set(
     [...js.matchAll(/(?:\$\(|querySelector\()['"]#([a-zA-Z0-9_-]+)/g)].map((m) => m[1])
   )];

@@ -25,7 +25,7 @@
   <!-- ① Fireworks intro -->
   <section id="stage-intro" class="stage active">
     <div class="sky" id="sky" aria-hidden="true"></div>
-    <div class="moon" aria-hidden="true">🌙</div>
+    <div class="moon" id="intro-moon" aria-hidden="true">🌙</div>
     <canvas id="fireworks"></canvas>
     <div class="intro-content">
       <p class="intro-sub">YOU ARE INVITED TO</p>
@@ -123,9 +123,31 @@
     <canvas id="confetti"></canvas>
   </section>
 
+  <!-- 🔺 Secret HQ (이스터에그: 인트로에서 삼각형을 그리거나 달을 5번 탭) -->
+  <div id="secret-overlay" class="secret-overlay hidden" role="dialog" aria-label="Secret found">
+    <div class="secret-box">
+      <div class="secret-tri">🔺</div>
+      <h2>SECRET FOUND!</h2>
+      <p>You discovered the hidden headquarters.<br />Agents only beyond this point...</p>
+      <button class="btn btn-hq" id="btn-enter-hq">ENTER HQ 🕵️</button>
+      <button class="btn-skip" id="btn-close-secret">Back to the invitation</button>
+    </div>
+  </div>
+
+  <section id="stage-mission" class="stage mission">
+    <header class="hq-header">
+      <span class="hq-badge">TOP SECRET</span>
+      <h2>JIA'S SECRET HQ</h2>
+    </header>
+    <div id="mission-body" class="mission-body"></div>
+    <button class="btn-skip hq-exit" id="btn-exit-hq">← leave HQ</button>
+  </section>
+
   <script src="js/config-v2.js"></script>
+  <script src="js/mission-config.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/fireworks.js"></script>
+  <script src="js/mission.js"></script>
   <script src="js/main-v2.js"></script>
 </body>
 </html>
