@@ -9,10 +9,10 @@ const PARTY_CONFIG_V2 = {
   childName: "Jia",
   partyTitle: "Jia's Birthday Party",
   partyDate: "Saturday, November 14",
-  partyTime: "4:00 PM",
-  dropOff: "Blue Lake Swimming Pool",
+  partyTime: "3:00 PM",
+  dropOff: "14 Thunder Trail, Irvine",
   pickupPlace: "14 Thunder Trail, Irvine",
-  pickupTime: "Sunday, November 15 · 10:30 AM",
+  pickupTime: "Sunday, November 15 · 11:00 AM",
   bringList: ["Swimsuit 🩱", "Pajamas 🌙"],
 
   // ---------- RSVP form delivery ----------
