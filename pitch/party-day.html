@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jia's Mystery Sleepover — D-Day 운영 플랜 (부모용)</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0d0b14;
+      --panel: rgba(255,255,255,0.045);
+      --line: rgba(255,255,255,0.12);
+      --gold: #e8b45a;
+      --violet: #8b5cf6;
+      --sky: #38bdf8;
+      --mint: #34d399;
+      --rose: #fb7185;
+      --text: #ece9f4;
+      --muted: #9b94ad;
+      --en: "Space Grotesk", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { touch-action: manipulation; font-size: clamp(15px, 1.05vw, 18px); }
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(1400px 700px at 85% -10%, rgba(139,92,246,0.14), transparent 60%),
+        radial-gradient(1000px 600px at 5% 110%, rgba(232,180,90,0.08), transparent 60%),
+        var(--ink);
+      color: var(--text);
+      height: 100dvh; overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .slide {
+      position: absolute; inset: 0; display: none;
+      flex-direction: column; align-items: center; justify-content: flex-start;
+      text-align: center; padding: 40px 20px 100px; gap: 1.05rem;
+      overflow-y: auto;
+    }
+    .slide.on { display: flex; animation: in 0.45s ease both; }
+    @keyframes in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; } }
+    .wrap { width: min(960px, 100%); display: flex; flex-direction: column; align-items: center; gap: 1.05rem; margin: auto 0; }
+
+    .label { font-family: var(--en); font-size: 0.72rem; letter-spacing: 0.4em; color: var(--gold); font-weight: 500; text-transform: uppercase; }
+    h1 { font-weight: 900; font-size: clamp(2.1rem, 6.5vw, 3.8rem); line-height: 1.16; letter-spacing: -0.02em; color: #fff; }
+    h2 { font-weight: 900; font-size: clamp(1.45rem, 4.2vw, 2.3rem); line-height: 1.25; letter-spacing: -0.015em; color: #fff; }
+    .em { color: var(--gold); }
+    .vi { color: #c4b5fd; }
+    .sk { color: var(--sky); }
+    .mt { color: var(--mint); }
+    .rs { color: var(--rose); }
+    p.sub { color: var(--muted); font-size: 1rem; line-height: 1.7; max-width: 46rem; }
+    p.sub b { color: var(--text); }
+
+    .panel {
+      width: 100%; text-align: left; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 18px; padding: 1.15rem 1.3rem;
+    }
+    .panel h3 { font-size: 1.02rem; font-weight: 700; margin-bottom: 0.55rem; color: #fff; }
+    .panel p, .panel li { color: #cfc9dd; font-size: 0.93rem; line-height: 1.75; }
+    .panel ul { padding-left: 1.2rem; }
+    .panel li::marker { color: var(--gold); }
+    .panel b { color: #fff; }
+    .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 0.9rem; width: 100%; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+    th { font-family: var(--en); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); font-weight: 700; padding: 0.5rem 0.65rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 0.52rem 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.06); color: #d8d3e6; line-height: 1.55; vertical-align: top; }
+    td.t { font-family: var(--en); white-space: nowrap; color: var(--sky); font-weight: 700; }
+    td b { color: #fff; }
+    tr.hl td { background: rgba(139,92,246,0.10); }
+    .small { font-size: 0.8rem; color: var(--muted); line-height: 1.65; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+    .chip {
+      font-size: 0.85rem; padding: 0.42rem 0.85rem; border-radius: 999px;
+      border: 1px solid var(--line); background: rgba(255,255,255,0.05); color: #e4dff0;
+    }
+    .big-emoji { font-size: 2.6rem; line-height: 1; }
+
+    .check li { list-style: none; position: relative; padding-left: 1.5rem; }
+    .check li::before { content: "☐"; position: absolute; left: 0; color: var(--gold); }
+
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0; display: flex;
+      align-items: center; justify-content: space-between; padding: 14px 18px;
+      background: linear-gradient(transparent, rgba(13,11,20,0.92) 45%);
+      z-index: 10;
+    }
+    .nav button {
+      font-family: var(--en); font-size: 0.8rem; letter-spacing: 0.12em; font-weight: 700;
+      color: var(--text); background: rgba(255,255,255,0.07); border: 1px solid var(--line);
+      border-radius: 999px; padding: 0.6rem 1.4rem; cursor: pointer;
+    }
+    .nav button:active { transform: scale(0.96); }
+    .count { font-family: var(--en); color: var(--muted); font-size: 0.75rem; letter-spacing: 0.25em; }
+    .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.6rem; width: 100%; }
+    .toc .panel { padding: 0.85rem 1rem; cursor: pointer; }
+    .toc .panel:hover { border-color: var(--gold); }
+    .toc .panel .n { font-family: var(--en); color: var(--gold); font-size: 0.7rem; letter-spacing: 0.2em; }
+  </style>
+</head>
+<body>
+
+<!-- 1. 타이틀 -->
+<section class="slide on">
+  <div class="wrap">
+    <div class="big-emoji">🕵️🌙💜</div>
+    <div class="label">Parents Only · Operation Manual</div>
+    <h1>Jia's Mystery Sleepover<br /><span class="em">D-Day 운영 플랜</span></h1>
+    <p class="sub"><b>11/14(토) 3:00 PM 드롭오프 → 11/15(일) 11:00 AM 픽업</b> · 요원(아이) <b>5명</b><br />
+    풀 파티 → 풀사이드 저녁 → 🔺시크릿(Secret HQ) → 10PM 취침 → 아침 요원 올림픽</p>
+    <div class="chips">
+      <span class="chip">🏊 Pool</span><span class="chip">🍕 Dinner</span><span class="chip">🕵️ Secret HQ</span>
+      <span class="chip">🏓 탁구</span><span class="chip">🎮 닌텐도</span><span class="chip">🎲 보드게임</span>
+    </div>
+    <p class="small">화면 탭 또는 → 키로 넘기세요</p>
+  </div>
+</section>
+
+<!-- 2. 스토리텔링 한 장 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">The Big Idea</div>
+    <h2>파티 <span class="em">전체</span>가 하나의 게임 —<br />모든 순서가 <span class="vi">NOVA 세계관</span>의 챕터입니다</h2>
+    <p class="sub">초대장 속에 숨어 있던 비밀 본부(HQ)의 AI <b>NOVA</b>. 시크릿만 게임이 아니라,
+    수영·저녁·샤워·취침·아침 놀이까지 전부 "요원 활동"으로 이름 붙이면 아이들의 몰입이 하루 종일 이어집니다.</p>
+    <div class="panel">
+      <table>
+        <tr><th>실제 순서</th><th>세계관 속 이름 (아이들에게 이렇게 부르세요)</th></tr>
+        <tr><td>🏊 풀 파티</td><td><b>AQUA TRAINING</b> — "요원 수중 훈련. 오늘 밤 작전 전 체력 테스트!"</td></tr>
+        <tr><td>🍕 풀사이드 저녁</td><td><b>ENERGY REFUEL</b> — "작전 전 에너지 충전 타임"</td></tr>
+        <tr><td>🚿 귀가 + 샤워</td><td><b>DECONTAMINATION</b> — "HQ 입장 전 오염 제거 프로토콜" (대기조는 🏓 훈련)</td></tr>
+        <tr class="hl"><td>🔺 시크릿</td><td><b>OPERATION: SECRET HQ</b> — 오늘의 메인 작전 (미션 4개 + 보물 금고)</td></tr>
+        <tr><td>😴 취침</td><td><b>NIGHT WATCH</b> — "요원도 충전이 필요하다. 10시 전원 슬립 모드"</td></tr>
+        <tr><td>🏓🎮🎲 아침 놀이</td><td><b>AGENT OLYMPICS</b> — "HQ 복구 기념 요원 올림픽" 후 전원 시상·해산</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 타임라인 Day1 오후 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Timeline · Day 1 Afternoon</div>
+    <h2>🏊 오후 — Aqua Training &amp; Refuel</h2>
+    <div class="panel">
+      <table>
+        <tr><th>시간</th><th>활동</th><th>포인트</th></tr>
+        <tr><td class="t">3:00</td><td><b>드롭오프</b> (14 Thunder Trail) · 환영 간식 · 수영복 환복</td><td>알레르기·수영 실력 RSVP 재확인, 보호자 연락처 체크</td></tr>
+        <tr><td class="t">3:20</td><td>풀 이동 · <b>AQUA TRAINING 개시 선언</b></td><td>"오늘 밤 비밀 작전이 있다. 지금은 체력 훈련!" 한마디로 떡밥</td></tr>
+        <tr><td class="t">3:30–5:30</td><td>자유 수영 + 미니 게임: 보물 다이빙(가라앉는 링), 릴레이, 마르코 폴로</td><td>5명 게임은 <b>개인전·릴레이형</b>으로 (짝 불필요). 비수영 아이는 심판/타이머 역할</td></tr>
+        <tr><td class="t">5:30–6:15</td><td><b>🍕 풀사이드 저녁</b> (피자·과일·물)</td><td>11월 일몰 ~4:55PM — 저녁은 야광팔찌 켜고 글로우 디너로 연출 ✨</td></tr>
+        <tr><td class="t">6:15–6:30</td><td>정리 · 귀가</td><td>인원 5명 카운트 × 2회 (풀 떠날 때·집 도착)</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>부모 준비 — 풀 파트</h3>
+      <ul class="check">
+        <li>타월 넉넉히(인당 2장) + 따뜻한 가운/후드 — <b>11월 저녁은 춥습니다</b>. 온수풀 여부 사전 확인</li>
+        <li>선크림·방수밴드·구급키트 / 가라앉는 다이빙 링·비치볼</li>
+        <li>저녁: 피자 사전 주문(픽업 5:15), 물·주스, 물티슈, 야광팔찌 5+개</li>
+        <li>성인 2명 역할 분담: 1명 물가 감시 전담(폰 금지), 1명 음식·사진</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 타임라인 Day1 저녁 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Timeline · Day 1 Evening</div>
+    <h2>🔺 저녁 — Operation: Secret HQ</h2>
+    <div class="panel">
+      <table>
+        <tr><th>시간</th><th>활동</th><th>포인트</th></tr>
+        <tr><td class="t">6:30–7:15</td><td><b>샤워 로테이션</b> ("DECONTAMINATION") · 잠옷 환복</td><td>5명이라 샤워가 병목! 2명 샤워 동안 3명은 🏓 <b>탁구 Around-the-World</b>로 대기 (아래 참고)</td></tr>
+        <tr class="hl"><td class="t">7:15</td><td><b>빅 리빌</b>: "초대장에 비밀이 숨어 있었다" → 삼각형 그리기 → PIN → 요원 등록 5명</td><td>거실 조명을 낮추면 몰입도 급상승 🔦</td></tr>
+        <tr class="hl"><td class="t">7:20–8:45</td><td><b>시크릿 미션 4개 + 필드 작전</b> (봉투 3개 수색)</td><td>역할 배지 5종 로테이션 — 다음 슬라이드</td></tr>
+        <tr class="hl"><td class="t">8:45</td><td><b>💎 보물상자 개봉(자물쇠 753)</b> + 개인 구디백 + "The 어워드" 전원 시상</td><td>MIDNIGHT SNACK 연출: 미션 2 정답과 이어지는 깜짝 간식</td></tr>
+        <tr><td class="t">9:00–9:30</td><td>쿨다운: 조용한 보드게임 or 짧은 영상, 간식</td><td>흥분 가라앉히기 — 새 자극 금지, 닌텐도는 아침으로 아껴두기</td></tr>
+        <tr><td class="t">9:30</td><td>양치·침구 세팅 ("NIGHT WATCH 개시")</td><td>침낭 위치 미리 지정해두면 다툼 방지</td></tr>
+        <tr><td class="t">10:00</td><td><b>소등</b> 🌙</td><td>무드등 1개 + "속닥속닥 10분 허용" 룰이 현실적</td></tr>
+      </table>
+    </div>
+    <p class="small">시크릿 상세 운영 대본·정답지는 MISSION_PLAN.md 참고 · 미션 수정은 js/mission-config.js</p>
+  </div>
+</section>
+
+<!-- 5. 시크릿 현재 버전 요약 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Secret HQ · 현재 버전 리뷰</div>
+    <h2>지금 버전, <span class="mt">이미 잘 만들어져 있습니다</span></h2>
+    <div class="cols">
+      <div class="panel">
+        <h3>✅ 그대로 가면 되는 것</h3>
+        <ul>
+          <li><b>NOVA 세계관 + 필드 작전</b> — 화면↔실세계를 오가는 구조가 최고의 장점</li>
+          <li><b>자동 역할 로테이션</b> — 앱이 명단 순서로 조작 담당을 돌려줌 (5명도 그대로 동작)</li>
+          <li><b>힌트 찬스 3개 + 오답 3회 무료 힌트</b> — 막힘 방지 장치 완비</li>
+          <li><b>진행 자동 저장 / ?reset / 오프라인 동작</b></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>⚠️ 파티 전 수정·확인 (중요)</h3>
+        <ul>
+          <li><b class="rs">PIN이 1107(옛 날짜)</b> — 파티가 11/14로 바뀌었으니 <b>mission-config.js의 pin을 "1114"</b>로 바꾸고 힌트도 "파티 날짜 네 자리!" 유지</li>
+          <li><b class="rs">MISSION_PLAN.md 피날레에 자물쇠 "379" 오타</b> — 실제 코드는 <b>753</b>. 실물 자물쇠는 반드시 753으로 세팅</li>
+          <li>MISSION_PLAN의 타임라인(2PM 도착·10:30 취침)은 구버전 — 이 덱의 시간표가 최신</li>
+          <li>수영 직후라 체력 저하 — 시몬 <b>rounds 7→6</b> 하향 고려, 전체 75분 내 목표</li>
+          <li>당일 아침: 태블릿 충전·자동잠금 OFF·와이파이·<b>?reset</b>으로 리허설 기록 초기화</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. 5명 설계 핵심 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Secret HQ · 5명 설계</div>
+    <h2>5는 어중간한 수가 아니라<br /><span class="em">완벽한 수</span>입니다 — 역할 5개 × 라운드 5개</h2>
+    <p class="sub">짝을 지으려 하면 5는 어렵지만, <b>역할을 5개로 나누면</b> 미션 4개 + 최종 보물찾기 = 딱 5라운드.
+    배지를 한 칸씩 돌리면 <b>전원이 모든 역할을 정확히 한 번씩</b> 합니다. 목걸이 배지 5개만 만드세요.</p>
+    <div class="panel">
+      <table>
+        <tr><th>역할 배지</th><th>하는 일</th><th>M1 미로</th><th>M2 암호</th><th>M3 반딧불</th><th>M4 수수께끼</th><th>💎 보물</th></tr>
+        <tr><td>🧭 <b>DRIVER</b></td><td>화면/조작 담당 (앱 교대와 병행)</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td></tr>
+        <tr><td>🗺️ <b>NAVIGATOR</b></td><td>방향·전략 지시, 팀 목소리 모으기</td><td>B</td><td>C</td><td>D</td><td>E</td><td>A</td></tr>
+        <tr><td>✍️ <b>SCRIBE</b></td><td>화이트보드 기록 (지나온 길·알파벳 표)</td><td>C</td><td>D</td><td>E</td><td>A</td><td>B</td></tr>
+        <tr><td>🧠 <b>KEEPER</b></td><td>기억·검산 담당 (막다른 길, 패턴 암송 리드)</td><td>D</td><td>E</td><td>A</td><td>B</td><td>C</td></tr>
+        <tr><td>🏃 <b>RUNNER</b></td><td>필드 작전 선봉 + 봉투 코드 입력</td><td>E</td><td>A</td><td>B</td><td>C</td><td>D</td></tr>
+      </table>
+      <p class="small" style="margin-top:0.6rem">A~E = 아이 이름. 미션이 끝날 때마다 "BADGE ROTATION!"을 외치고 배지를 왼쪽으로 전달 —
+      이 의식 자체가 리듬을 만들고, 전원이 "다음 내 역할"을 기대하게 됩니다. 앱의 세부 교대(미로 12걸음마다 등)는 그대로 두세요 — 배지는 "화면 밖 임무"를 정해주는 장치입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7. 미션별 5인 집중 포인트 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Secret HQ · 미션별 집중 유지법</div>
+    <h2>"내 일이 있는 아이"는 <span class="sk">딴짓하지 않습니다</span></h2>
+    <div class="cols">
+      <div class="panel">
+        <h3>🌫️ M1 미로 (화면 1명 + 구경 4명이 되기 쉬움)</h3>
+        <ul>
+          <li><b>SCRIBE가 화이트보드에 지나온 길을 지도로 그리게</b> 하세요 — 96걸음 안개 미로라 실제로 큰 도움 = 가짜 역할이 아님</li>
+          <li>KEEPER는 막다른 길 선언 담당, NAVIGATOR가 좌우 콜, RUNNER는 문스톤 수수께끼 보기 읽어주기</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>📡 M2 암호 (13글자 = 5명 분업에 최적)</h3>
+        <ul>
+          <li>SCRIBE가 알파벳 띠를 쓰면, <b>글자를 2~3개씩 나눠</b> 각자 변환 → 전원 참여 보장</li>
+          <li>KEEPER가 완성 문장 검산 후 DRIVER가 입력</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>🧚 M3 반딧불 기억게임 (5인 공식)</h3>
+        <ul>
+          <li>색 4개 + 아이 5명 → 4명이 색 하나씩 전담해 자기 색이 켜질 때 외치고, <b>5번째(KEEPER)는 "지휘자"</b>로 순서 번호를 센다</li>
+          <li>또는 n번 아이가 n번째·(n+5)번째 깜빡임을 암기 — 라운드 7이면 전원에게 임무가 떨어짐</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>🧠 M4 수수께끼 3개 (3문제 ÷ 5명)</h3>
+        <ul>
+          <li>①번 2명 · ②번 2명 · ③번 1명+전원 검산으로 분배 → 동시에 풀고 모여서 753 조립</li>
+          <li>자물쇠는 <b>RUNNER가 아닌 그 라운드 DRIVER(E)</b>가 돌리게 — 마지막 영광도 로테이션 안에</li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>🔦 몰입 부스터 (준비 5분, 효과 최고)</h3>
+      <p>필드 작전(봉투 수색) 때 <b>거실 조명을 끄고 손전등 1개</b>만 주기 · 미션 시작 전 "요원 선서" 한 줄 복창 ·
+      봉투를 찾으면 전원 하이파이브 후 입력 — 흩어졌던 에너지가 화면 앞으로 다시 모입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8. 취침 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Night Watch</div>
+    <h2>😴 10PM 소등을 지키는 현실적인 방법</h2>
+    <div class="cols">
+      <div class="panel">
+        <h3>흐름 설계</h3>
+        <ul>
+          <li>9:00부터는 <b>내려가는 자극만</b>: 조용한 보드게임·잔잔한 영상·스트레칭. 닌텐도·탁구는 금지(아침 예고로 달래기)</li>
+          <li>"NOVA의 마지막 방송": 태블릿으로 "요원들, 내일 아침 8시 올림픽이 열린다. 지금은 슬립 모드" — 세계관으로 취침을 정당화</li>
+          <li>침낭 자리는 부모가 미리 배치(이름표) — 5명이면 자리 다툼 1순위 예방</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>부모 준비 — 밤</h3>
+        <ul class="check">
+          <li>침낭/이불 5세트 + 무드등 1개 + 머리맡 물병 5개</li>
+          <li>혹시 모를 향수병(homesick) 대비: 보호자 연락처 머리맡에, "언제든 집에 전화해도 괜찮아" 안내</li>
+          <li>칫솔 여분·수건 5장 / 아침까지 거실 정리(발 걸리는 것 제거)</li>
+          <li>소등 후 10분 "속닥 타임" 공식 허용 → 오히려 빨리 잠듭니다</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. 아침 올림픽 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Timeline · Day 2 Morning</div>
+    <h2>🥇 아침 — Agent Olympics<br /><span class="sub" style="font-size:1rem">탁구 · 닌텐도 · 보드게임, 전부 5인용으로</span></h2>
+    <div class="panel">
+      <table>
+        <tr><th>시간</th><th>활동</th><th>5명 공식</th></tr>
+        <tr><td class="t">8:00</td><td>기상 · 세수 ("요원 재부팅")</td><td>일찍 깬 아이용 조용한 그림그리기 코너 준비</td></tr>
+        <tr><td class="t">8:15–8:50</td><td>🥞 아침: 팬케이크/와플 토핑 바</td><td>각자 꾸미는 방식 = 그 자체가 활동. 알레르기 재확인</td></tr>
+        <tr class="hl"><td class="t">8:50–9:20</td><td>🏓 <b>탁구: Around-the-World</b></td><td>전원 한 줄로 테이블을 돌며 한 번씩 치기, 실수하면 탈락, 최후 2인 결승 — <b>짝 없이 몇 명이든 OK</b>. 2차전: King of the Table(이긴 사람이 남고 줄 서서 도전)</td></tr>
+        <tr class="hl"><td class="t">9:20–9:50</td><td>🎮 <b>닌텐도</b> (마리오카트 등 4인 게임)</td><td><b>4명 플레이 + 1명 "캐스터"</b>(중계·시상 담당, 폴라로이드 촬영) — 레이스마다 캐스터 로테이션. 꼴찌 교체가 아니라 <b>순번 교체</b>로(눈물 방지). 스매시브라더스가 있다면 5인 동시 가능</td></tr>
+        <tr class="hl"><td class="t">9:50–10:20</td><td>🎲 <b>보드게임</b></td><td>5인에 강한 게임으로: Uno·Spot It·젠가·Sushi Go. 편 갈라야 하면 2:3 + 심판 없이 가능한 게임 선택</td></tr>
+        <tr><td class="t">10:20–10:45</td><td>🏅 <b>올림픽 폐회식</b>: 전원 수상(종목별 다른 메달) + 타임캡슐 쪽지("내년 생일에 열기") + 짐 싸기</td><td>구디백·젖은 수영복 봉투 이름 확인</td></tr>
+        <tr><td class="t">11:00</td><td>픽업 · 해산</td><td>보호자에게 감사 인사, 당일 저녁 감사 문자 발송</td></tr>
+      </table>
+    </div>
+    <p class="small">종목 점수를 합산하지 말고 <b>종목별로 다른 아이가 메달</b>을 가져가게 조율 — "전원 수상"이 미국 파티의 안전장치입니다.</p>
+  </div>
+</section>
+
+<!-- 10. 마스터 체크리스트 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Master Checklist</div>
+    <h2>🧾 부모 준비물 — 타이밍별 총정리</h2>
+    <div class="cols">
+      <div class="panel">
+        <h3>📅 파티 전날까지</h3>
+        <ul class="check">
+          <li>RSVP 취합: 알레르기·수영 실력·사진 동의·숙박/저녁픽업 여부</li>
+          <li><b>mission-config.js: pin "1114"로 수정</b> 후 npm test</li>
+          <li>자물쇠 <b>753</b> 세팅 + 보물상자(구디백 5개 이름표) 지아 방 배치</li>
+          <li>봉투 3개 은닉: SPLASH(소파 쿠션)·MOON(냉동실)·STAR(수건장)</li>
+          <li>역할 배지 5개 제작(🧭🗺️✍️🧠🏃) + 화이트보드·마커·손전등</li>
+          <li>장보기: 피자 예약·간식·아침 재료·야광팔찌·답례 메달/스티커</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>🌞 당일 오후</h3>
+        <ul class="check">
+          <li>태블릿: 충전 100%·자동잠금 OFF·<b>?reset</b>·와이파이 확인</li>
+          <li>풀 가방: 타월 10장·가운·선크림·구급키트·다이빙 링</li>
+          <li>피자 픽업 5:15 알람 / 성인 2명 풀 역할 분담 확정</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>🌙 저녁~밤</h3>
+        <ul class="check">
+          <li>샤워 수건 5장 대기 + 탁구채 꺼내두기(샤워 대기조용)</li>
+          <li>빅 리빌 직전: 거실 조명 조절, 간식 'MIDNIGHT SNACK' 스탠바이</li>
+          <li>침낭 5자리 이름 배치·무드등·물병</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>☀️ 다음날</h3>
+        <ul class="check">
+          <li>아침 토핑 바 세팅(7:40) / 닌텐도·보드게임·메달 준비</li>
+          <li>타임캡슐 상자+쪽지 / 젖은 짐 봉투 5개(이름)</li>
+          <li>픽업 시 보호자 인사 → 저녁 감사 문자(MISSION_PLAN 하단 문구)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. 컨닝페이퍼 -->
+<section class="slide">
+  <div class="wrap">
+    <div class="label">Cheat Sheet 🤫</div>
+    <h2>정답 요약 — 이 장만 기억하면 됩니다</h2>
+    <div class="panel">
+      <table>
+        <tr><th>항목</th><th>값</th></tr>
+        <tr><td>HQ 열기</td><td>초대장 첫 화면에 <b>삼각형 그리기</b> (안 되면 달🌙 5번 탭)</td></tr>
+        <tr><td>PIN</td><td><b>1114</b> (파티 날짜 — 수정 반영 후!) · 수정 전이라면 1107</td></tr>
+        <tr><td>힌트</td><td>팀 공용 3개 + 오답 3회마다 무료 힌트 + 최후에 "부모 전화 찬스"</td></tr>
+        <tr><td>봉투 코드</td><td>SPLASH → MOON → STAR</td></tr>
+        <tr><td>미션 2 정답</td><td><b>MIDNIGHT SNACK</b> (모든 글자를 한 칸 뒤로)</td></tr>
+        <tr><td>자물쇠</td><td><b>753</b> (7=√49 · 5=4×2−3 · 3=7−4) — 보물상자는 지아 방 침대 근처</td></tr>
+        <tr><td>배지 로테이션</td><td>미션 끝날 때마다 "BADGE ROTATION!" — 배지를 왼쪽으로</td></tr>
+      </table>
+    </div>
+    <div class="big-emoji">💎✨</div>
+    <p class="sub">모든 시스템 준비 완료. <b class="em">요원들의 밤을 시작하세요.</b></p>
+  </div>
+</section>
+
+<nav class="nav">
+  <button id="prev">← PREV</button>
+  <span class="count" id="count">1 / 11</span>
+  <button id="next">NEXT →</button>
+</nav>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  let i = 0;
+  const show = (n) => {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle("on", k === i));
+    document.getElementById("count").textContent = `${i + 1} / ${slides.length}`;
+    slides[i].scrollTop = 0;
+  };
+  document.getElementById("next").addEventListener("click", () => show(i + 1));
+  document.getElementById("prev").addEventListener("click", () => show(i - 1));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") show(i + 1);
+    if (e.key === "ArrowLeft" || e.key === "PageUp") show(i - 1);
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".nav")) return;
+    show(i + 1);
+  });
+  show(0);
+</script>
+</body>
+</html>
